@@ -1,0 +1,23 @@
+<style>
+  [data-model=balance] table span {font-weight: bold}
+  [data-model=balance] table td:first-child{text-align:right}
+  [data-model=balance] table th,[data-model=balance] table td{padding:5px;border:1px solid#ccc;}
+</style>
+
+<div data-model="balance" data-provider="services/balances/{{$queryString}}">
+  <h1>Balance Sheet {{$queryString}}</h1>
+  <table>
+    <tr>
+      <th>Assets</th>
+      <th>Liabilities</th>
+    </tr>
+    <tr>
+      <td><p>Cash {{assets.cash}}</p><p>Investments {{assets.investments}}</p></td>
+      <td><p>{{liabilities.debt}} Debt</p><p>{{liabilities.shareholders}} Shareholders</p></td>
+    </tr>
+    <tr>
+      <td><p>Total {{assets.total}}</p></td>
+      <td><p>{{liabilities.total}} Total</p></td>
+    </tr>
+  </table>
+</div>
