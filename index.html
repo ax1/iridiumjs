@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Iridiumjs by angelrego</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-dark.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/angelrego/iridiumjs">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/angelrego/iridiumjs/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/angelrego/iridiumjs/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Iridiumjs</h1>
+          <p>Boost HTML horsepower</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/angelrego">angelrego</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h1>
+<a id="iridiumjs" class="anchor" href="#iridiumjs" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>IRIDIUM.JS</strong>
+</h1>
+
+<p>Create web applications by using <strong>html, css and javascript</strong>. No extra knowledge is required. No ninja skills are required.</p>
+
+<p>Don't use server technologies to render html data (PHP, JSF, GWT, CGI (sic)...). <strong>This library is server independent</strong>, so your html code will be portable. Just use the server as a data provider.</p>
+
+<p>You will use the existing html tags and some HTML5 data-* attributes to create dynamic pages. No coffeescript, no typescript, no npm, bower, grunt, gulp, etc is needed (but it is also welcome). Learning curve?, if you know a little of html, css,javascript, and REST, <strong>learning ALL the features takes one day</strong> (half a day if you feel happy, and two hours if you are a ninja).</p>
+
+<p>This Javascript library is strongly oriented to these concepts:</p>
+
+<ul>
+<li>
+<strong>following Model View Controller (<a href="https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">MVC</a>) pattern</strong>. Models: the objects containing data, View: the html tags to display data, Controller: The code to manage data flow between the model an the view.</li>
+<li>
+<strong>HTML attributes and syntax</strong>, <strong>instead of</strong> typing lots of <strong>javascript</strong> code. Example:  <code>&lt;p&gt;{{userName}}&lt;/p&gt;</code> will display the real user name, loaded from a REST call</li>
+<li>
+<strong>the server doesn't create any HTML, it is just a <a href="https://en.wikipedia.org/wiki/Representational_state_transfer">REST</a> API</strong>. This allows to separate front-end developers (HTML5+CSS+JS) from back-end developers (PHP, JAVA, .NET, NODE, RUBY , PYTHON...)</li>
+</ul>
+
+<hr>
+
+<h2>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>FEATURES</h2>
+
+<ul>
+<li>
+<strong>set of generic utilities</strong>, like ajaxForm (given a form name, send all parameters to a server via ajax) or security (keep authentication token between calls).</li>
+<li>
+<strong>load html pages on demand</strong>, load pages from server, asynchronously and in background.</li>
+<li>
+<strong>routing</strong>, load one or several pages, given a logic name, navigate by using logic links, etc.</li>
+<li>
+<strong>templating</strong>, write your dynamic code inside the html itself.</li>
+<li>
+<strong>REST oriented</strong>, if the server is just a REST API, this is the best case scenario, since the GET POST PUT DELETE operations are already built-in.</li>
+<li>
+<strong>two-way data binding</strong> available, watch changes between your input tags and the text tags.</li>
+<li>
+<strong>built-in authentication</strong>, all the rest calls can be secured, just call the ir.security, the first time.</li>
+<li>
+<strong>multiscope</strong>, the templates can use data from its own model or from other models.</li>
+</ul>
+
+<hr>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>USAGE</h2>
+
+<p>insert into your html page the javascript file, this js code relies on jquery so you should import it as well.</p>
+
+<div class="highlight highlight-text-html-basic"><pre>&lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s"><span class="pl-pds">"</span>https://code.jquery.com/jquery-2.1.4.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;
+&lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s"><span class="pl-pds">"</span>iridium/iridium.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;</pre></div>
+
+<p>Then, you can either add special attributes to the html tags, or use the javascript object <em>iridium</em> or <em>ir</em>.</p>
+
+<div class="highlight highlight-text-html-basic"><pre><span class="pl-c">&lt;!--html example, use data-target attribute to load details into the id="yourcontainer" box--&gt;</span>
+&lt;<span class="pl-ent">a</span> <span class="pl-e">href</span>=<span class="pl-s"><span class="pl-pds">"</span>#/details<span class="pl-pds">"</span></span> <span class="pl-e">data-target</span>=<span class="pl-s"><span class="pl-pds">"</span>#yourcontainer<span class="pl-pds">"</span></span>&gt;details&lt;/<span class="pl-ent">a</span>&gt;
+
+<span class="pl-c">&lt;!--javascript example, load users into content box--&gt;</span>
+<span class="pl-s1">&lt;<span class="pl-ent">script</span>&gt;</span>
+<span class="pl-s1">    <span class="pl-c">//ir and iridium are aliases to the same object</span></span>
+<span class="pl-s1">    <span class="pl-smi">ir</span>.<span class="pl-c1">load</span>(<span class="pl-s"><span class="pl-pds">"</span>details<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>#yourcontainer<span class="pl-pds">"</span></span>);</span>
+<span class="pl-s1">&lt;/<span class="pl-ent">script</span>&gt;</span></pre></div>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
