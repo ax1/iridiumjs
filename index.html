@@ -21,9 +21,9 @@
       <div id="header">
         <nav>
           <li class="fork"><a href="https://github.com/angelrego/iridiumjs">View On GitHub</a></li>
-          <li class="downloads"><a href="https://github.com/angelrego/iridiumjs/zipball/master">ZIP</a></li>
-          <li class="downloads"><a href="https://github.com/angelrego/iridiumjs/tarball/master">TAR</a></li>
-          <li class="title">DOWNLOADS</li>
+          <li class="downloads"><a href="versions/">traditional: download version</a></li>
+          <li class="downloads"><a href="#usage">fast: get online link</a> </li>
+          <li class="title" style="font-size:1.1em">Installation options</li>
         </nav>
       </div><!-- end header -->
 
@@ -88,10 +88,16 @@
 <h2>
 <a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>USAGE</h2>
 
-<p>insert into your html page the javascript file, this js code relies on jquery so you should import it as well.</p>
+<p>insert into your html page the following code, jquery must also be imported as well.</p>
 
-<div class="highlight highlight-text-html-basic"><pre>&lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s"><span class="pl-pds">"</span>https://code.jquery.com/jquery-2.1.4.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;
-&lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s"><span class="pl-pds">"</span>iridium/iridium.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;</pre></div>
+<div class="highlight highlight-text-html-basic"><pre>&lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s"><span class="pl-pds">"</span>https://code.jquery.com/jquery-2.2.0.min.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;
+&lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s"><span class="pl-pds">"</span>http://angelrego.github.io/iridiumjs/versions/iridium-0.4.2.min.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;</pre></div>
+
+<p> or alternatively you can download the jquery & iridium javascript files to your local project folder.</p>
+
+<div class="highlight highlight-text-html-basic"><pre>&lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s"><span class="pl-pds">"</span>js/jquery-2.2.0.min.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;
+&lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s"><span class="pl-pds">"</span>js/iridium-0.4.2.min.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;</pre></div>
+
 
 <p>Then, you can either add special attributes to the html tags, or use the javascript object <em>iridium</em> or <em>ir</em>.</p>
 
@@ -107,6 +113,6 @@
 
     </div>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-    
+
   </body>
 </html>
