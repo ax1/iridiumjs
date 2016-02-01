@@ -5,7 +5,9 @@ Javascript library to create web apps.
 
 Easy to learn & use, fully compatible with any server technology, JSON & REST oriented.
 
-Go to [wiki](https://github.com/angelrego/iridiumjs/wiki) for detailed info.
+Go to  **[site](https://github.com/angelrego/iridiumjs/wiki)** for general description & production iridium.js file.
+
+Go to **[wiki](https://github.com/angelrego/iridiumjs/wiki)** for detailed info, tutorial, demo & reference.
 
 ### Set up (USER) ###
 Add iridium.js to your application ([jquery](http://jquery.com/download/) is also required)
