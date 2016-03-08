@@ -585,8 +585,9 @@ count++;
 			//alert(templateName);
 			var selector=cssAttribute(c.data_model,templateName);
 			var jTemplate=$(selector);
-			if (jTemplate.length<=0) console.error(selector+" was not found");
+			if (jTemplate.length<=0) console.warn("template '"+selector+"' was not found. If you are trying to render data to HTML (templates), this is an ERROR. On the other side, if you just want to perform REST calls and process the data with javascript, this is an INFO messsage.");
 			var elTemplate=jTemplate[0];
+			if(!elTemplate) return;
 			var isTemplateInited=false;
 			var newTemplate=checkDynamicTemplateName(templateName, elTemplate,object);
 			if(templateName!==newTemplate){
@@ -836,11 +837,15 @@ count++;
 		}
 
 		function callCustomOK(objectController,method){
-			if(objectController.customMethods[method] && objectController.customMethods[method][0]) objectController.customMethods[method][0]();
+			if(objectController.customMethods[method] && objectController.customMethods[method][0]) {
+				objectController.customMethods[method][0](objectController);
+			}
 		}
 
 		function callCustomERROR(controller,method){
-			if(objectController.customMethods[method] && objectController.customMethods[method][1]) objectController.customMethods[method][1]();
+			if(objectController.customMethods[method] && objectController.customMethods[method][1]){
+				objectController.customMethods[method][1](objectController);
+			}
 
 		}
 
