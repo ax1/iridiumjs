@@ -9,7 +9,7 @@ if (console) console.info("iridium.js 0.4.2");
 //TODO add prototype to router and view objects (as controller does)
 if (!$) alert('jQuery is required!!!');
 var iridium=function(customNamespace,startTag,endTag){
-	
+
 
 	var namespace="iridium";
 
@@ -78,6 +78,7 @@ var iridium=function(customNamespace,startTag,endTag){
 	* @param responseType Optional, the type of the expected response .default is undefined,null or '*'.
 	*/
 	var ajax=function(url,method,payload,context,responseType){
+		if (!method) method="get";
 		var dataType= responseType|| '*';
 		return $.ajax({
 		headers:headers,
