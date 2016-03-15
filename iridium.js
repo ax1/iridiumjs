@@ -217,10 +217,17 @@ count++;
 		 * Example: url="users/details.php?user=smith", the selector will be css="#details"
 		 */
 		function calculateContainerSelector(url,selector){
+
+			function testDuplicatedContainer(url,selector){
+				if($(selector).length>1) console.warn("Container "+selector-+" is not unique (it should be most of the cases). The content of page "+url+" will be loaded into the first one");
+			}
+
 			var originalSelector=selector;
+			testDuplicatedContainer(url,selector);
 			if( $(selector).length===0){
 				//no valid selector, find the best container for the page to be loaded
 				selector="#"+selector;
+				testDuplicatedContainer(url,selector);
 				if($(selector).length===0){
 					var addr=url;
 					var index=addr.indexOf("?");
@@ -232,8 +239,11 @@ count++;
 					index=addr.lastIndexOf(".");
 					if (index>-1) addr=addr.substring(0,index);
 					selector="#"+addr;
+					testDuplicatedContainer(url,selector);
 					if($(selector).length===0) {
+						testDuplicatedContainer(url,selector);
 						selector=cssAttribute(c.data_container);
+						testDuplicatedContainer(url,selector);
 						if($(selector).length===0) {
 							selector="body";
 							console.error("container for url "+url+" is " +originalSelector+", but there is no DOM element related to that container, using default("+selector+")" );
@@ -603,7 +613,7 @@ count++;
 			var object=controllers[templateName].model.obj;
 			if(jTemplate.attr(c.data_status)){isTemplateInited=true;}
 			//if(!(el instanceof HTMLElement)) el=$(el)[0];//TODO check if this line is still a valid functionality
-			console.debug("initializing template " +templateName);
+			console.debug("initializing template '" +templateName+"'");
 			//paint nodes
 			paintNodes(isTemplateInited,templateName,elTemplate,jTemplate,object);
 
