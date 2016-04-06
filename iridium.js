@@ -209,7 +209,7 @@ count++;
 	/**
 	 * Load an html/js page (generic method)
 	 */
-	function _load(url,selector,functionDone){
+	function _load(url,selector,callback){
 
 		/**
 		 * calculate the real selector of the container to be loaded
@@ -265,9 +265,9 @@ count++;
 			}else{
 				//any other selector, download page and then execute methods
 				selector=calculateContainerSelector(url,selector);
-				functionDone=functionDone || function(){};
+				callback=callback || function(){};
 				callbacks=function(){
-					functionDone();
+					callback();
 					checkAndExecuteFunctionAfterViewsLoaded(url);
 				};
 				_unload(selector);//remove existing data & events
@@ -1104,8 +1104,8 @@ count++;
 				processAjaxFailResponse(jqXHR, textStatus, errorThrown);
 			});
 		},
-		load:function(url,selector,functionDone){
-			_load(url,selector,functionDone);
+		load:function(url,selector,callback){
+			_load(url,selector,callback);
 		},
 		session:function(){return session;},
 
