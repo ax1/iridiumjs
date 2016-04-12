@@ -28,6 +28,7 @@ var iridium=function(customNamespace,startTag,endTag){
 		data_status:"data-status",
 		data_skeleton:"data-skeleton",
 		data_provider:"data-provider",
+		data_event:"data-event",
 		data_:"data-",
 		create:"create",
 		read:"read",
@@ -39,6 +40,25 @@ var iridium=function(customNamespace,startTag,endTag){
 	function cssAttribute(attr,value){
 		if (!value && value!=='') {return "["+attr+"]"; }
 		else {return "["+attr+"='"+value+"']";}
+	}
+
+	/**
+	 * Execute a function without using eval
+	 * See www.sitepoint.com/call-javascript-function-string-without-using-eval/
+	 * @param functionName the function name to be executed
+	 * @param params [OPTIONAL] array of params to be used as input params
+	 * @param scope [OPTIONAL] The object to search for the function definition.if scope is not set, the gglobal scope is used (window)
+	 */
+	 //TODO improve this method by:
+	 		// 1-using apply(this,params) instead of apply(null),
+			// 2-check if the scope can be autodetected, or taken from the caller of this function,
+			// 3- add to the ir global object
+	function executeFunction(functionName,params,scope){
+		var myParams; var myScope;
+		if (!params) myParams=[];
+		if (!scope) scope=window;
+		var fn = scope[functionName];
+		if (typeof fn === "function") fn.apply(null, myParams);
 	}
 
 	/**
@@ -187,21 +207,23 @@ var iridium=function(customNamespace,startTag,endTag){
 	 * Execute some generic code after the view was loaded.
 	 * Note: use functionDone for custom functions.
 	 */
-	var count=0;
 	function checkAndExecuteFunctionAfterViewsLoaded(url){
 		delete pagesStillLoading[url];
-
 		//(ALREADY LOADED WHEN CONFIGURE ROUTER->READ(either from controller().configure or from data-provider))
 		$("["+c.data_model+"]:not(["+c.data_status+"])").each(function( ) {
 			if (this.getAttribute(c.data_provider)) paintToTemplate(this.getAttribute(c.data_model));
 		});
-count++;
-//		$("["+c.data_model+"]",":not["+c.data_status+"]").each(function( ) {
-//			initializeTemplate($(this).attr(c.data_model),this);
-//			$(this).attr(c.data_status,"inited");
-//		});
+		//after page loaded execute custom function
 		if($.isEmptyObject(pagesStillLoading)){
-			if(funcToCallAfterViewLoaded) funcToCallAfterViewLoaded();
+			if(funcToCallAfterViewLoaded){
+				if (typeof funcToCallAfterViewLoaded==='function'){
+					funcToCallAfterViewLoaded();
+				}else if (typeof funcToCallAfterViewLoaded==='string'){
+					executeFunction(funcToCallAfterViewLoaded);
+				}else{
+					console.error(funcToCallAfterViewLoaded +"is not a function or an String. It cannot be executed (related to '"+url+"')");
+				}
+			}
 		}
 
 	}
@@ -746,11 +768,14 @@ count++;
 		}
 	};
 
+	var temporaryCustomClick={
+		router:undefined,//the router to execute the function, just once
+		func:undefined,//a custom function to be executed just ONCE. Different than RouterFunction (executed on every call);
+		new:false//detect if the custom function will be called asynchronously
+	};
 
-
-
-	var firstTime=true;//check if page is refreshed or not.
-	var funcToCallAfterViewLoaded;
+	var firstTime=true;//check if page is reloaded from the browser
+	var funcToCallAfterViewLoaded;//buffer object to detect if a function must be called
 
 	/**
 	 * When location.hash changes, decide which pages should be rendered
@@ -770,8 +795,14 @@ count++;
 			funcToCallAfterViewLoaded=processRoute;
 			hash='';//execute default hash
 		}else{
-			console.log("processing router  '"+location.hash+"'");
 			funcToCallAfterViewLoaded=undefined;
+			console.log("processing router  '"+location.hash+"'");
+			if (temporaryCustomClick.new===true){
+				if(temporaryCustomClick.router===hash) {
+					funcToCallAfterViewLoaded=temporaryCustomClick.func;
+					temporaryCustomClick.new=false;
+				}
+			}
 		}
 		//
 		// PROCESS ROUTER
@@ -1039,10 +1070,17 @@ count++;
 		var $el=$("#"+c.layerLog);
 		if($el.css("display")!="none") $el.slideUp();
 	};
+
 	/**
-	 * init is different than start. Init starts the r object itself while start is called after page is loaded (and then renders the dynamic pages)
+	 * init is different than start. Init starts the ir object itself while start is called after page is loaded (and then renders the dynamic pages)
 	 */
 	function init(){
+		//process ad-hoc click events on <a> router links
+		$(document).on("click","a["+c.data_event+"]",function(){
+			temporaryCustomClick.router=this.getAttribute('href');
+			temporaryCustomClick.func=this.getAttribute(c.data_event);
+			temporaryCustomClick.new=true;
+		});
 		$(window).on("hashchange", processRoute);
 		//Ajax can set request headers but not html files, every time a new tab is open  the list of headers are loaded from cookies
 		insertHeaders();
