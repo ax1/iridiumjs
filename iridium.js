@@ -1,4 +1,4 @@
-if (console) console.info("iridium.js 0.4.2");
+if (console) console.info("iridium.js 0.5.0");
 
 /*jshint -W083 */
 
@@ -47,12 +47,11 @@ var iridium=function(customNamespace,startTag,endTag){
 	 * See www.sitepoint.com/call-javascript-function-string-without-using-eval/
 	 * @param functionName the function name to be executed
 	 * @param params [OPTIONAL] array of params to be used as input params
-	 * @param scope [OPTIONAL] The object to search for the function definition.if scope is not set, the gglobal scope is used (window)
+	 * @param scope [OPTIONAL] The object to search for the function definition.if scope is not set, the global scope is used (window)
 	 */
 	 //TODO improve this method by:
 	 		// 1-using apply(this,params) instead of apply(null),
 			// 2-check if the scope can be autodetected, or taken from the caller of this function,
-			// 3- add to the ir global object
 	function executeFunction(functionName,params,scope){
 		var myParams; var myScope;
 		if (!params) myParams=[];
@@ -915,7 +914,22 @@ var iridium=function(customNamespace,startTag,endTag){
 			var promise=new Promise(
 				function(resolve,reject){
 					//TODO:SECURITY, PREVENT CODE INJECTION by escaping {{ in the model
-					if(typeof objectController.url=='object'){
+					//{detect if url is a proper URL or an object (javascript object or JSON object as well)
+					var isObject=false;
+					if (typeof objectController.url=='object'){
+						isObject=true;
+					}else	if (objectController.url.startsWith("{") || objectController.url.startsWith("[")){
+						try{
+							objectController.url=JSON.parse(objectController.url);
+							isObject=true;
+						}catch (err){
+							console.console.error("Controller '"+objectController.name+"'. The provider is not an URL neither an object ('"+objectController.url+"')");
+							isObject=false;
+						}
+					}
+					//end detect}
+					//retrieve provider data
+					if(isObject){
 						objectController.model.obj=objectController.url;
 						paintToTemplate(objectController.name);
 						callCustomOK(objectController,c.read);
@@ -1142,8 +1156,11 @@ var iridium=function(customNamespace,startTag,endTag){
 				processAjaxFailResponse(jqXHR, textStatus, errorThrown);
 			});
 		},
-		load:function(url,selector,callback){
-			_load(url,selector,callback);
+		load:function(url,container,callback){
+			_load(url,container,callback);
+		},
+		executeFunction:function(functionName,params,scope){
+				executeFunction(functionName,params,scope);
 		},
 		session:function(){return session;},
 
