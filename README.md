@@ -16,7 +16,7 @@ Add iridium.js to your application ([jquery](http://jquery.com/download/) is als
 ```html
 
 <script src="http://code.jquery.com/jquery-2.2.3.min.js"></script>
-<script src="http://angelrego.github.io/iridiumjs/versions/iridium-0.4.2.min.js"></script>
+<script src="http://angelrego.github.io/iridiumjs/versions/iridium-0.5.0.min.js"></script>
 ```
 ### Set up (CONTRIBUTOR) ###
 
