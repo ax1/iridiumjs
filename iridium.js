@@ -542,7 +542,7 @@ var iridium=function(customNamespace,startTag,endTag){
 				for(var s=0;s<el.children.length;s++){
 					var elChild=el.children[s];
 					if(elChild.attributes[c.data_model]) {
-						paintToTemplate(elChild.attributes[c.data_model]); //if other template is found, bypass (it will be managed by another controller)
+						paintToTemplate(elChild.getAttribute(c.data_model)); //if other template is found, bypass (it will be managed by another controller)
 					}else {
 						paintNodes(isTemplateInited,templateName,elChild,$(elChild),object);
 					}
