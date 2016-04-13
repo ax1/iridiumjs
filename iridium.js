@@ -931,6 +931,7 @@ var iridium=function(customNamespace,startTag,endTag){
 					//retrieve provider data
 					if(isObject){
 						objectController.model.obj=objectController.url;
+						objectController.isReady=true;
 						paintToTemplate(objectController.name);
 						callCustomOK(objectController,c.read);
 						resolve(objectController);
