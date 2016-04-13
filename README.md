@@ -15,11 +15,11 @@ Add iridium.js to your application ([jquery](http://jquery.com/download/) is als
 
 ```html
 
-<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="http://code.jquery.com/jquery-2.2.3.min.js"></script>
 <script src="http://angelrego.github.io/iridiumjs/versions/iridium-0.4.2.min.js"></script>
 ```
 ### Set up (CONTRIBUTOR) ###
 
-No weird or complex configuration is required, just clone the repo, open your favourite IDE or text editor and let your fingers flow!!! 
+No weird or complex configuration is required, just clone the repo, open your favourite IDE or text editor and let your fingers play the piano!!!
 
 Enjoy!
