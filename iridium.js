@@ -2,10 +2,6 @@ if (console) console.info("iridium.js 0.5.1");
 
 /*jshint -W083 */
 
-//section que haga url
-//attributes interesantes
-//hidden, item e itempro, data-*  contenteditable="true"
-//tags summary details
 //TODO add prototype to router and view objects (as controller does)
 if (!$) alert('jQuery is required!!!');
 var iridium=function(customNamespace,startTag,endTag){
@@ -34,7 +30,7 @@ var iridium=function(customNamespace,startTag,endTag){
 		read:"read",
 		update:"update",
 		delete:"delete",
-		remove:"remove" //TODO erase remove after delete keyword is checked
+		remove:"remove" //TODO erase remove after delete keyword is checked (ES6)
 	};
 
 	function cssAttribute(attr,value){
@@ -617,7 +613,7 @@ var iridium=function(customNamespace,startTag,endTag){
 
 		/**
 		 * Based on the template syntax, data is rendered.
-		 * Note: the template syntax is not replaced, new attributes are created in elements, to keep thant syntax while replacing with real data
+		 * Note: the template syntax is not replaced, new attributes are created in elements, to keep that syntax while replacing with real data
 		 * @param templateName the name of the template that is currently processed
 		 */
 		function paintToTemplate(templateName){
@@ -631,9 +627,6 @@ var iridium=function(customNamespace,startTag,endTag){
 			var elTemplate=jTemplate[0];
 			if(!elTemplate) return;
 			var isTemplateInited=false;
-			if (templateName==='resource'){
-				debugger;
-			}
 			var newTemplate=checkDynamicTemplateName(templateName, elTemplate);
 			if(templateName!==newTemplate){
 				//dynamic template, the controller has been configured and it will call this method later, so exit.
@@ -824,9 +817,6 @@ var iridium=function(customNamespace,startTag,endTag){
 			if(!routers['']) router('').configure(function(){_load('');});
 			routers[''].run();
 		}else{
-			//TODO resolver el problema de cuando se refresca la pagina
-			//tiene que buscar el target(container) porque si no se carga por defecto en el body (y se perdería el resto)
-			//JOrigin tiene los targets, poner ese target y no target=id que está mas abajo, si no hay target se pone target=id
 			var $el=$(cssAttribute("href",hash));
 			if($el.length>1) console.warn("duplicated href elements("+hash+"), maybe they target different containers.");
 			if($el.length<1) console.warn("no target is defined for hash '"+hash+"'");
@@ -871,7 +861,6 @@ var iridium=function(customNamespace,startTag,endTag){
 				///value=encodeURI(value);
 				setObjectProperty(this.obj,key,value);
 				paintToTemplate(this.name);
-				//$("["+c.data_model+"='"+name+"']").find("["+c.data_value+"='"+key+"']").html(value);
 			}
 		};
 		return model;
@@ -1130,15 +1119,6 @@ var iridium=function(customNamespace,startTag,endTag){
 		},
 		getFormData:function(form){
 			return $(form).serializeArray();
-			/*
-			this code was replaced by jquery equivalent
-			var data={};
-			for (var r=0;r<form.elements.length;r++){
-			    var name=form[r].name;
-			    if (!name) name="param_"+r;
-			    data[name]=form[r].value;
-			}
-			return data;*/
 		},
 		/**
 		* Generic ajax call.
