@@ -557,7 +557,7 @@ var iridium=function(customNamespace,startTag,endTag){
 			//object. the dynamic template should take a value from his parent template "{{a}}", or explicit template "{{myTemplate:a}"
 			var object;
 			var jParent=$(elTemplate).parent(cssAttribute(c.data_model));
-			if(jParent){
+			if(jParent.length>0){
 				var parentTemplateName=jParent.attr(c.data_model);
 				object=controllers[parentTemplateName].model.obj;
 			}
