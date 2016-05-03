@@ -182,8 +182,8 @@ var iridium=function(customNamespace,startTag,endTag){
 	function addCSS(){
 		var style=
 			"<style>"+
-				"[data-model]{visibility:hidden}"+
-				"[data-model][data-status]{visibility:visible}"+
+				"[data-model]{display:none}"+
+				"[data-model][data-status]{display:block}"+
 			"</style>";
 			$('body').prepend(style);
 	}
@@ -634,7 +634,7 @@ var iridium=function(customNamespace,startTag,endTag){
 				return;
 			}
 			if(checkIfControllerIsConfiguredAndReady(templateName,elTemplate)===false)  {
-				return; //wait for configuration process finished
+				return; //asynchronous call-wait for configuration process finished. When the controller has retrieve data, it will call paintToTemplate again
 			}
 			var object=controllers[templateName].model.obj;
 			if(jTemplate.attr(c.data_status)){isTemplateInited=true;}
