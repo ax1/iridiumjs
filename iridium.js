@@ -1,4 +1,4 @@
-if (console) console.info("iridium.js 0.5.0");
+if (console) console.info("iridium.js 0.5.1");
 
 /*jshint -W083 */
 
@@ -542,7 +542,7 @@ var iridium=function(customNamespace,startTag,endTag){
 				for(var s=0;s<el.children.length;s++){
 					var elChild=el.children[s];
 					if(elChild.attributes[c.data_model]) {
-						paintToTemplate(elChild.getAttribute(c.data_model)); //if other template is found, bypass (it will be managed by another controller)
+						//paintToTemplate(elChild.getAttribute(c.data_model)); //if other template is found, bypass (it will be managed by another controller)
 					}else {
 						paintNodes(isTemplateInited,templateName,elChild,$(elChild),object);
 					}
@@ -554,10 +554,18 @@ var iridium=function(customNamespace,startTag,endTag){
 		 * if data-model='details' everything is ok
 		 * if data-model='details_{{index}}' the template name should be changed and attached to controller (if exists)
 		 */
-		function checkDynamicTemplateName(templateName, elTemplate,object){
-			//check-data-model
+		function checkDynamicTemplateName(templateName, elTemplate){
 			var model=templateName;
 			var provider=elTemplate.getAttribute(c.data_provider);
+			if (model.indexOf(tag1)===-1 && provider.indexOf(tag1)===-1) return model;//static template, exit
+			//object. the dynamic template should take a value from his parent template "{{a}}", or explicit template "{{myTemplate:a}"
+			var object;
+			var jParent=$(elTemplate).parent(cssAttribute(c.data_model));
+			if(jParent){
+				var parentTemplateName=jParent.attr(c.data_model);
+				object=controllers[parentTemplateName].model.obj;
+			}
+			//check-data-model
 			var res1=lookupExpression(templateName, model, object);
 			if (res1){
 				var newTemplateName=res1.newText;
@@ -571,7 +579,7 @@ var iridium=function(customNamespace,startTag,endTag){
 			if (res2) {
 				provider=res2.newText;
 				elTemplate.setAttribute(c.data_provider,provider);
-				if(controllers[model]) throw (namespace+": controller "+model+":"+provider+" is an existing object. Either remove it or just ovewrite it");
+				if(controllers[model]) throw (namespace+": controller "+model+":"+provider+" is an existing object. Either remove it or just overwrite it");
 				//controllers[model]=controller(model);
 			}
 			//if changed, load provider async(ajax), and don't paint until the data is downloaded
@@ -616,18 +624,22 @@ var iridium=function(customNamespace,startTag,endTag){
 			//alert(templateName);
 			var selector=cssAttribute(c.data_model,templateName);
 			var jTemplate=$(selector);
-			if (jTemplate.length<=0) console.warn("template '"+selector+"' was not found. If you are trying to render data to HTML (templates), this is an ERROR. On the other side, if you just want to perform REST calls and process the data with javascript, this is an INFO messsage.");
+			if (jTemplate.length<=0) {
+				console.error(new Error(templateName).toString());
+				console.warn("template '"+templateName+" ',the selector ' '"+selector+"' was not found. If you are trying to render data to HTML (templates), this is an ERROR. On the other side, if you just want to perform REST calls and process the data with javascript, this is an INFO messsage.");
+			}
 			var elTemplate=jTemplate[0];
 			if(!elTemplate) return;
 			var isTemplateInited=false;
-			var newTemplate=checkDynamicTemplateName(templateName, elTemplate,object);
+			if (templateName==='resource'){
+				debugger;
+			}
+			var newTemplate=checkDynamicTemplateName(templateName, elTemplate);
 			if(templateName!==newTemplate){
+				//dynamic template, the controller has been configured and it will call this method later, so exit.
 				paintToTemplate(newTemplate);
 				return;
 			}
-			// if(checkDynamicTemplateName(templateName, elTemplate,object)) {
-			// 	return; //dynamic template, the controller has been configured and it will call this method later, so exit.
-			// }
 			if(checkIfControllerIsConfiguredAndReady(templateName,elTemplate)===false)  {
 				return; //wait for configuration process finished
 			}
