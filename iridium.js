@@ -48,7 +48,7 @@ var iridium=function(customNamespace,startTag,endTag){
 	 //TODO improve this method by:
 	 		// 1-using apply(this,params) instead of apply(null),
 			// 2-check if the scope can be autodetected, or taken from the caller of this function,
-	function executeFunction(functionName,params,scope){
+	function run(functionName,params,scope){
 		var myParams; var myScope;
 		if (!params) myParams=[];
 		if (!scope) scope=window;
@@ -214,7 +214,7 @@ var iridium=function(customNamespace,startTag,endTag){
 				if (typeof funcToCallAfterViewLoaded==='function'){
 					funcToCallAfterViewLoaded();
 				}else if (typeof funcToCallAfterViewLoaded==='string'){
-					executeFunction(funcToCallAfterViewLoaded);
+					run(funcToCallAfterViewLoaded);
 				}else{
 					console.error(funcToCallAfterViewLoaded +"is not a function or an String. It cannot be executed (related to '"+url+"')");
 				}
@@ -324,7 +324,7 @@ var iridium=function(customNamespace,startTag,endTag){
 
 		function process(controllerName,key,object){
 			//querystring is special, it can contain no keys
-			if(key==="$queryString") return queryString();
+			if(key==="$queryString" || key==="$querystring") return queryString();
 			var index=key.indexOf(":");
 			if(index<0){
 				var pos=key.indexOf("(");
@@ -1117,7 +1117,7 @@ var iridium=function(customNamespace,startTag,endTag){
 		queryString:function(key){
 			return queryString(key);
 		},
-		getFormData:function(form){
+		formData:function(form){
 			return $(form).serializeArray();
 		},
 		/**
@@ -1152,8 +1152,8 @@ var iridium=function(customNamespace,startTag,endTag){
 		load:function(url,container,callback){
 			_load(url,container,callback);
 		},
-		executeFunction:function(functionName,params,scope){
-				executeFunction(functionName,params,scope);
+		run:function(functionName,params,scope){
+				run(functionName,params,scope);
 		},
 		session:function(){return session;},
 
