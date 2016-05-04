@@ -538,7 +538,7 @@ var iridium=function(customNamespace,startTag,endTag){
 				for(var s=0;s<el.children.length;s++){
 					var elChild=el.children[s];
 					if(elChild.attributes[c.data_model]) {
-						//paintToTemplate(elChild.getAttribute(c.data_model)); //if other template is found, bypass (it will be managed by another controller)
+						paintToTemplate(elChild.getAttribute(c.data_model)); //if other template is found, bypass (it will be managed by another controller)
 					}else {
 						paintNodes(isTemplateInited,templateName,elChild,$(elChild),object);
 					}
@@ -556,7 +556,7 @@ var iridium=function(customNamespace,startTag,endTag){
 			if (model.indexOf(tag1)===-1 && provider.indexOf(tag1)===-1) return model;//static template, exit
 			//object. the dynamic template should take a value from his parent template "{{a}}", or explicit template "{{myTemplate:a}"
 			var object;
-			var jParent=$(elTemplate).parent(cssAttribute(c.data_model));
+			var jParent=$(elTemplate).parents(cssAttribute(c.data_model));
 			if(jParent.length>0){
 				var parentTemplateName=jParent.attr(c.data_model);
 				object=controllers[parentTemplateName].model.obj;
@@ -627,6 +627,15 @@ var iridium=function(customNamespace,startTag,endTag){
 			var elTemplate=jTemplate[0];
 			if(!elTemplate) return;
 			var isTemplateInited=false;
+			//if the parent template is not inited yet, wait for initialization before painting this templates
+			var jParent=jTemplate.parents(cssAttribute(c.data_model));
+			if(jParent.length>0){
+				var parentTemplateName=jParent.attr(c.data_model);
+				if (!controllers[parentTemplateName].isReady){
+					return;//exit and wait, this template will be painted when its parent template is ready to process the content
+				}
+			}
+
 			var newTemplate=checkDynamicTemplateName(templateName, elTemplate);
 			if(templateName!==newTemplate){
 				//dynamic template, the controller has been configured and it will call this method later, so exit.
