@@ -139,15 +139,17 @@ var iridium=function(customNamespace,startTag,endTag){
     * Example: obj={a:1,b:{b1:0,b2:8}} and key=b.b2
     */
     function getObjectProperty(key, object){
-        if (!object) console.error("No object found when looking for key='"+key+"'");
+    try{
         var data = key.split('.');
         if (data.length===1) return object[data];
         while(data.length>1){
-            object = object[data.shift()];
-            if (object===undefined) object={};
+          object = object[data.shift()];
         }
-        //return object[data.shift()] || "";
         return object[data.shift()] || "";
+      }catch(error){
+        console.error("No object found when looking for key='"+key+"'."+error);
+        return "";
+      }
     }
     /**
     * Set a deep property value into an object
