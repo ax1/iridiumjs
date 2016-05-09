@@ -1,0 +1,22 @@
+{
+    "env": {
+        "browser": true,
+        "es6": true,
+        "jquery":true
+    },
+    "extends": "eslint:recommended",
+    "installedESLint": true,
+    "parserOptions": {
+        "ecmaFeatures": {
+            "experimentalObjectRestSpread": true
+        },
+        "sourceType": "module"
+    },
+    "rules": {
+      "no-unused-vars":["error", { "argsIgnorePattern": "jqXHR|event|arr" }],
+      "no-console": [
+          "error",
+           {"allow": ["warn", "error","log","info","debug"]}
+      ]
+    }
+}

@@ -6,7 +6,6 @@ if (console) console.info("iridium.js 0.5.1");
 if (!$) alert('jQuery is required!!!');
 var iridium=function(customNamespace,startTag,endTag){
 
-
     var namespace="iridium";
 
     var tag1=startTag || "{{";
@@ -49,7 +48,7 @@ var iridium=function(customNamespace,startTag,endTag){
              // 1-using apply(this,params) instead of apply(null),
             // 2-check if the scope can be autodetected, or taken from the caller of this function,
     function run(functionName,params,scope){
-        var myParams; var myScope;
+        var myParams;
         if (!params) myParams=[];
         if (!scope) scope=window;
         var fn = scope[functionName];
@@ -274,7 +273,6 @@ var iridium=function(customNamespace,startTag,endTag){
 
         try{
             pagesStillLoading[url]=true;
-            flagLoaded=false;
             console.log('loading '+url);
             if (url==='') {
                 //default container so the content is already loaded, just execute the methods to render templates
@@ -283,7 +281,7 @@ var iridium=function(customNamespace,startTag,endTag){
                 //any other selector, download page and then execute methods
                 selector=calculateContainerSelector(url,selector);
                 callback=callback || function(){};
-                callbacks=function(){
+                var callbacks=function(){
                     callback();
                     checkAndExecuteFunctionAfterViewsLoaded(url);
                 };
@@ -426,7 +424,7 @@ var iridium=function(customNamespace,startTag,endTag){
         /**
          * parse {{}} in attributes
          */
-        function parseAttributes(isTemplateInited,templateName, el,jEl, object,arrayIndex){
+        function parseAttributes(isTemplateInited,templateName, el,jEl, object){
 
             function parseAttribute(attr){
                 if (attr.value.indexOf(tag1)===-1) return;//if nothing to process->exit as fast as possible
@@ -442,8 +440,6 @@ var iridium=function(customNamespace,startTag,endTag){
                 }
                 //add to real html attribute the processed value
                 var realAttrName=attr.name.substring(c.data_.length);
-                var realAttr=el[realAttrName];
-
                 //----------------------------------------------------------
                 //      if real attribute->set real values
                 //----------------------------------------------------------
@@ -481,7 +477,7 @@ var iridium=function(customNamespace,startTag,endTag){
 
             }
 
-            function parseALLAttributes(isTemplateInited,templateName, el,jEl, object,arrayIndex){
+            function parseALLAttributes(isTemplateInited,templateName, el,jEl){
                 //initialize the first time
                 if(!isTemplateInited){
                     for(var i=0;i<el.attributes.length;i++){
@@ -505,7 +501,7 @@ var iridium=function(customNamespace,startTag,endTag){
             }
 
 
-            parseALLAttributes(isTemplateInited,templateName, el,jEl, object,arrayIndex);
+            parseALLAttributes(isTemplateInited,templateName, el,jEl);
         }
 
         /**
@@ -601,7 +597,7 @@ var iridium=function(customNamespace,startTag,endTag){
             var provider=elTemplate.getAttribute(c.data_provider);
             if(!provider){//if not configured in html mode, it must be configured in javascript mode
                 if (!controllers[model]) {
-                    console.warning( "there is no controller for "+templateName+". Check if ["+c.data_provider+"] or ir.controller(name).configure(url) exists");
+                    console.warn( "there is no controller for "+templateName+". Check if ["+c.data_provider+"] or ir.controller(name).configure(url) exists");
                     return false;
                 }else return true;
             }
@@ -882,7 +878,7 @@ var iridium=function(customNamespace,startTag,endTag){
 
     var controller=function(name){
 
-        function controller(name2){
+        function controller(name){
             this.name=name;
             this.url=undefined;
             this.model=model(name);
@@ -910,7 +906,7 @@ var iridium=function(customNamespace,startTag,endTag){
                 function(resolve,reject){
                     //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
                         ajaxJSON(objectController.url,"post",JSON.stringify(objectController.model.obj),objectController).then(
-                        function(data, textStatus, jqXHR){
+                        function(data, textStatus,jqXHR){
                             showLog("created");
                             callCustomOK(objectController,c.create);
                             resolve(objectController);
@@ -938,7 +934,7 @@ var iridium=function(customNamespace,startTag,endTag){
                             objectController.url=JSON.parse(objectController.url);
                             isObject=true;
                         }catch (err){
-                            console.console.error("Controller '"+objectController.name+"'. The provider is not an URL neither an object ('"+objectController.url+"')");
+                            console.error("Controller '"+objectController.name+"'. The provider is not an URL neither an object ('"+objectController.url+"')");
                             isObject=false;
                         }
                     }
@@ -1085,18 +1081,18 @@ var iridium=function(customNamespace,startTag,endTag){
             isAuthenticated:_isAuthenticated,
             setAuthenticated:_setAuthenticated,
             getAuthenticated:_getAuthenticated,
-            removeAuthenticated:_removeAuthenticated,
+            removeAuthenticated:_removeAuthenticated
         }  ;
     })();
 
-    showLog=function(text){
+    var showLog=function(text){
         $("#"+c.layerLog).css("background-color","lime").text(text).slideDown();
     };
-    showErrorLog=function(error){
+    var showErrorLog=function(error){
         console.error(error);
         $("#"+c.layerLog).css("background-color","red").text(error).slideDown();
     };
-    hideLog=function(){
+    var hideLog=function(){
         var $el=$("#"+c.layerLog);
         if($el.css("display")!="none") $el.slideUp();
     };
@@ -1181,8 +1177,8 @@ var iridium=function(customNamespace,startTag,endTag){
     };
 }();
 
-var ir=iridium;//built-in shortcut
-var $ir=iridium;//built-in shortcut;
+var $ir=iridium;//built-in shortcut
+var ir=$ir;//built-in shortcut;
 
 
 //IMPORTANT-Start after document is loaded
