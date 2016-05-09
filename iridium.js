@@ -1,7 +1,5 @@
 if (console) console.info("iridium.js 0.5.1");
 
-/*jshint -W083 */
-
 //TODO add prototype to router and view objects (as controller does)
 if (!$) alert('jQuery is required!!!');
 var iridium=function(customNamespace,startTag,endTag){
@@ -151,7 +149,6 @@ var iridium=function(customNamespace,startTag,endTag){
         //return object[data.shift()] || "";
         return object[data.shift()] || "";
     }
-
     /**
     * Set a deep property value into an object
     * Note: if the property is not found, this method will create it
@@ -683,7 +680,7 @@ var iridium=function(customNamespace,startTag,endTag){
                     var elSkeleton=document.createElement("div");
                     elSkeleton.style.display="none";
                     elSkeleton.setAttribute(c.data_skeleton,"");
-                    for (var r=0;r<el.children.length;r++){elSkeleton.appendChild(el.children[r]);}
+                    while (el.children.length>0){elSkeleton.appendChild(el.children[0]);}
                     //create the list elements
                     var skeleton=elSkeleton.innerHTML;
                     var text="";
@@ -693,7 +690,11 @@ var iridium=function(customNamespace,startTag,endTag){
                         text=text+newText;
                     });
                     el.innerHTML=text;
+                    //if skeleton then bypass
+                    var nodeList=elSkeleton.querySelectorAll(cssAttribute(c.data_model));
+                    for(var s=0;s<nodeList.length;s++){nodeList[s].setAttribute(c.data_status,"inited");}//TODO check if keeping the skeleton is useful, or remove it
                     el.appendChild(elSkeleton);
+                    //continue with child elements
                     parseChildren(isTemplateInited,templateName, el,jEl, object);
                     //the following code has better performance but it would be difficult to change array index for all the {{}} in properties and child nodes
                     // array.forEach(function (item, index,arr){
