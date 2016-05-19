@@ -55,6 +55,27 @@ var iridium=function(customNamespace,startTag,endTag){
     }
 
     /**
+     * Execute a function only when an external variable has been loaded.
+     * This function is really useful when a page is loaded, and the page contains <script src="url"> along with <script>varName?;;</script> tags.
+     * The external source is loaded asynchronously, so if we try to use a variable from that src, it could be undefined.
+     * This is a better way to execute a function, instead of a fixed setTimeout (callback, milliseconds) in your code.
+     * @param variableName the name of the variable to check its availability
+     * @param scope the object containing that variable definition (eg:window["variableName"], scope is window)
+     * @param milliseconds [OPTIONAL] the maximun time to poll for availability of thet variable
+     * @param callback the name of the function, or the function itself, to be executed when the variable is available
+     * This method polls if the variable is already available,and then execute our custom function.
+     */
+    function onAvailable(variableName,scope,milliseconds=1000,callback){
+      if (!scope) scope=window;
+      var variable=scope[variableName];
+      if(typeof variable!=='undefined'){callback();}
+      else{
+        milliseconds=milliseconds-10;
+        setTimeout(function(){onAvailable(variableName,scope,milliseconds,callback)},10);
+      }
+    }
+
+    /**
      * Return either the full querystring or the value of a key in the querystring
      * @param key the id to get the value, if !key, the full querystring is returned as '';
      */
@@ -1176,6 +1197,9 @@ var iridium=function(customNamespace,startTag,endTag){
         },
         load:function(url,container,callback){
             _load(url,container,callback);
+        },
+        onAvailable: function(variableName,scope,milliseconds,callback){
+           onAvailable(variableName,scope,milliseconds,callback);
         },
         run:function(functionName,params,scope){
                 run(functionName,params,scope);
