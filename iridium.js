@@ -22,6 +22,7 @@ var iridium=function(customNamespace,startTag,endTag){
         data_skeleton:"data-skeleton",
         data_provider:"data-provider",
         data_event:"data-event",
+        data_load:"data-load",
         data_:"data-",
         create:"create",
         read:"read",
@@ -219,6 +220,16 @@ var iridium=function(customNamespace,startTag,endTag){
             }
         }
 
+    }
+
+    /**
+     * Load all child pages inside the containers. Any container must have the data-load property containing the url to be loaded.
+     */
+    function loadChildPages(){
+      $("["+c.data_load+"]").each(function( ) {
+          var url=this.getAttribute(c.data_load);
+          _load(url,cssAttribute(c.data_load,url));
+      });
     }
 
     /**
@@ -1125,7 +1136,8 @@ var iridium=function(customNamespace,startTag,endTag){
             if ($(cssAttribute(c.data_container)).length===0) {console.warn("A tag with attribute "+c.data_container+" should be defined, to provide a default container when a page is loaded");} //if no default container, when refreshing a url with hash, a page is loaded but there is no target to load into.
             addCSS();
             createLayerLog();
-            processRoute();
+            loadChildPages();//load pages requested from data-load containers
+            processRoute();// load pages requested from the address bar
         },
         queryString:function(key){
             return queryString(key);
