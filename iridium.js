@@ -92,7 +92,7 @@ var iridium=function(customNamespace,startTag,endTag){
                 var data=q.split('&');
                 var value='';
                 for (var i = 0; i < data.length; i++) {
-                    var kv = data.split('=');
+                    var kv = data[i].split('=');
                     if (kv[0]===key){
                         value=decodeURIComponent(kv[1] || '');
                         break;
