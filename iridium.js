@@ -167,7 +167,8 @@ var iridium=function(customNamespace,startTag,endTag){
         while(data.length>1){
           object = object[data.shift()];
         }
-        return object[data.shift()] || "";
+        if (typeof(object)==='undefined') return undefined;
+        else return object[data];
       }catch(error){
         console.error("No object found when looking for key='"+key+"'."+error);
         return "";
