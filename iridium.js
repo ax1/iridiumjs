@@ -1186,7 +1186,7 @@ var iridium=function(customNamespace,startTag,endTag){
             url: form.action,
             cache:false,
             type: form.method,
-            data: this.getFormData(form),
+            data: this.formData(form),
             dataType: '*',
             beforeSend: function(){hideLog();}
             })
