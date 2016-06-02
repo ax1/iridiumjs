@@ -649,15 +649,15 @@ var iridium=function(customNamespace,startTag,endTag){
         /**
          * Based on the template syntax, data is rendered.
          * Note: the template syntax is not replaced, new attributes are created in elements, to keep that syntax while replacing with real data
-         * @param templateName the name of the template that is currently processed
+         * @param {string} templateName the name of the template that is currently processed
          */
         function paintToTemplate(templateName){
             //alert(templateName);
             var selector=cssAttribute(c.data_model,templateName);
             var jTemplate=$(selector);
             if (jTemplate.length<=0) {
-                console.error(new Error(templateName).toString());
                 console.warn("template '"+templateName+" ',the selector ' '"+selector+"' was not found. If you are trying to render data to HTML (templates), this is an ERROR. On the other side, if you just want to perform REST calls and process the data with javascript, this is an INFO messsage.");
+                return;
             }
             var elTemplate=jTemplate[0];
             if(!elTemplate) return;
