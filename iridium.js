@@ -267,15 +267,17 @@ var iridium=function(customNamespace,startTag,endTag){
         function calculateContainerSelector(url,selector){
 
             function testDuplicatedContainer(url,selector){
-                if($(selector).length>1) console.warn("Container "+selector-+" is not unique (it should be most of the cases). The content of page "+url+" will be loaded into the first one");
+                if($(selector).length>1) console.warn("Container '"+selector+"' is not unique (it should be most of the cases). The content of page "+url+" will be loaded into the first one");
             }
 
             var originalSelector=selector;
             testDuplicatedContainer(url,selector);
             if( $(selector).length===0){
                 //no valid selector, find the best container for the page to be loaded
-                selector="#"+selector;
-                testDuplicatedContainer(url,selector);
+                if(selector && selector.trim().startsWith('#')===false){
+                  selector="#"+selector;
+                  testDuplicatedContainer(url,selector);
+                }
                 if($(selector).length===0){
                     var addr=url;
                     var index=addr.indexOf("?");
