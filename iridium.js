@@ -1,6 +1,7 @@
-if (console) console.info("iridium.js 0.5.1");
+if (console) console.info("iridium.js 0.5.2");
 
 //TODO add prototype to router and view objects (as controller does)
+var $;
 if (!$) alert('jQuery is required!!!');
 var iridium=function(customNamespace,startTag,endTag){
 
