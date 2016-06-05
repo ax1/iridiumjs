@@ -363,8 +363,10 @@ var iridium=function(customNamespace,startTag,endTag){
             if(key==="$queryString" || key==="$querystring") return queryString();
             var index=key.indexOf(":");
             if(index<0){
+                //key is a function instead a value.if function() with no params, add 'this' object, for magic features
                 var pos=key.indexOf("(");
                 if(pos>-1){
+                    if (key.indexOf("()")>-1) key=key.substring(0,pos+1)+"this"+key.substring(pos+1);
                     return "ir.controller('"+controllerName+"')."+key;
                 }else{
                     return getObjectProperty( key, object);
@@ -437,6 +439,7 @@ var iridium=function(customNamespace,startTag,endTag){
 
     /**
      * prevent hacking
+     * //TODO IMPORTANT: wether you escape or not, the main work on sanitize must be IN THE SERVER SIDE (the client can always be hacked)
      */
     function sanitizeText(el,text){
         //if <a>, disable javascript injection via href
@@ -450,6 +453,7 @@ var iridium=function(customNamespace,startTag,endTag){
         }
         return text;
     }
+
 
     /**
      * Initialize the template the first time AND
