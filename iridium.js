@@ -581,8 +581,10 @@ var iridium=function(customNamespace,startTag,endTag){
                     var elChild=el.children[s];
                     if(elChild.attributes[c.data_model]) {
                         paintToTemplate(elChild.getAttribute(c.data_model)); //if other template is found, bypass (it will be managed by another controller)
+                    } else if(elChild.attributes[c.data_skeleton]){
+                      // do not process data-skeleton
                     }else {
-                        paintNodes(isTemplateInited,templateName,elChild,$(elChild),object);
+                      paintNodes(isTemplateInited,templateName,elChild,$(elChild),object);
                     }
                 }
             }
