@@ -1063,9 +1063,9 @@ var iridium=function(customNamespace,startTag,endTag){
               function(resolve,reject){
                 try {
                   model.set(null,null,element);
-                  resolve();
+                  resolve(controller);
                 } catch (e) {
-                  reject(e);
+                  reject(controller,e);
                 }
               }
           );
@@ -1078,13 +1078,13 @@ var iridium=function(customNamespace,startTag,endTag){
          */
         controller.prototype.remove=function(element){
           let name=this.name;
-
+          let controller=this;
           let model=this.model;
           let promise=new Promise(
               function(resolve,reject){
                 if(!Array.isArray(model.obj)){
                   console.warn("Remove an object property is not a good idea");//remove a property is not a good idea. For instance: remove property type...bad
-                  reject();
+                  reject(controller);
                 }
                 let rowEl=null;
                 let el=element;
@@ -1095,7 +1095,7 @@ var iridium=function(customNamespace,startTag,endTag){
                 }
                 if (!rowEl){
                   console.error("Error when removing element in template '"+name+"'. The child row was not found.");
-                  reject();
+                  reject(controller);
                 }else{
                   let index=0;
                   for (let i = 0; i < rowEl.parentElement.children.length; i++) {
@@ -1108,7 +1108,7 @@ var iridium=function(customNamespace,startTag,endTag){
                   }
                   model.remove(index,rowEl);
                 }
-                resolve();
+                resolve(controller);
               }
             );
             return promise;
