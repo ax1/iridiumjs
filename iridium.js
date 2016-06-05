@@ -692,7 +692,8 @@ var iridium=function(customNamespace,startTag,endTag){
             var object=controllers[templateName].model.obj;
             if(jTemplate.attr(c.data_status)){isTemplateInited=true;}
             //if(!(el instanceof HTMLElement)) el=$(el)[0];//TODO check if this line is still a valid functionality
-            console.debug("initializing template '" +templateName+"'");
+            if(isTemplateInited) console.debug("painting template '" +templateName+"'");
+            else console.debug("initializing & painting template '" +templateName+"'");
             //paint nodes
             paintNodes(isTemplateInited,templateName,elTemplate,jTemplate,object);
 
@@ -717,45 +718,33 @@ var iridium=function(customNamespace,startTag,endTag){
                  el=$(el)[0];
                 jEl=$(el);
             }
-            if(el.attributes[c.data_skeleton]) return;//if skeleton, do nothing
+            //(el.attributes[c.data_skeleton]) return;//if skeleton, do nothing
             if(object instanceof Array && el.hasAttribute(c.data_model)){
                 var array=object;
                 //if template not processed, copy all child nodes into a hidden container
                 if (isTemplateInited===false){
                     //create skeleton
-                    var elSkeleton=document.createElement("div");
+                    let elSkeleton=document.createElement("div");
                     elSkeleton.style.display="none";
                     elSkeleton.setAttribute(c.data_skeleton,"");
                     while (el.children.length>0){elSkeleton.appendChild(el.children[0]);}
-                    //create the list elements
-                    var skeleton=elSkeleton.innerHTML;
-                    var text="";
-                    array.forEach(function (item, index,arr){
-                        var newText=skeleton.replace(/\{\{0}}/g,"{{"+index+"}}");
-                        newText=newText.replace(/\{\{0\./g,"{{"+index+".");
-                        text=text+newText;
-                    });
-                    el.innerHTML=text;
-                    //if skeleton then bypass
-                    var nodeList=elSkeleton.querySelectorAll(cssAttribute(c.data_model));
-                    for(var s=0;s<nodeList.length;s++){nodeList[s].setAttribute(c.data_status,"inited");}//TODO check if keeping the skeleton is useful, or remove it
                     el.appendChild(elSkeleton);
-                    //continue with child elements
-                    parseChildren(isTemplateInited,templateName, el,jEl, object);
-                    //the following code has better performance but it would be difficult to change array index for all the {{}} in properties and child nodes
-                    // array.forEach(function (item, index,arr){
-                    //     var elClone=elSkeleton.cloneNode(true);
-                    //     var children=elClone.children;
-                    //     for (var i = 0; i < children.length; i++) {
-                    //         var elChild=children[i];
-                    //         var jElChild=$(elChild);
-                    //         el.appendChild(elChild);
-                    //         parseAttributes(isTemplateInited,templateName,elChild,jElChild,object,i);
-                    //         parseContent(isTemplateInited,templateName,elChild,jElChild,object,i);
-                    //         parseChildren(isTemplateInited,templateName,elChild,jElChild,object,i);
-                    //     }
-                    // });
                 }
+                //create the list elements
+                let elSkeleton=el.querySelector(cssAttribute(c.data_skeleton));
+                var skeleton=elSkeleton.innerHTML;
+                var text="";
+                array.forEach(function (item, index,arr){
+                    var newText=skeleton.replace(/\{\{0}}/g,"{{"+index+"}}");
+                    newText=newText.replace(/\{\{0\./g,"{{"+index+".");
+                    text=text+newText;
+                });
+                el.innerHTML=text+elSkeleton.outerHTML;
+                //if skeleton then bypass
+                var nodeList=elSkeleton.querySelectorAll(cssAttribute(c.data_model));
+                for(var s=0;s<nodeList.length;s++){nodeList[s].setAttribute(c.data_status,"inited");}//TODO check if keeping the skeleton is useful, or remove it
+                //continue with child elements
+                parseChildren(isTemplateInited,templateName, el,jEl, object);
             }else{
                 parseAttributes(isTemplateInited,templateName, el,jEl, object);
                 parseContent(isTemplateInited,templateName, el,jEl, object);
