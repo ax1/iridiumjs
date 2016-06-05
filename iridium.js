@@ -900,13 +900,23 @@ var iridium=function(customNamespace,startTag,endTag){
 
         var model={
             name:name,
-            obj:{},
+            obj:{} /*obj can be {} or []*/,
             get:function(key){return getObjectProperty(key, this.obj);},
             set:function(key,value){
                 //TODO:SECURITY, PREVENT CODE INJECTION
                 ///value=encodeURI(value);
                 setObjectProperty(key,value,this.obj);
                 paintToTemplate(this.name);
+            },
+            remove:function(key,element){
+              var obj=getObjectPropertyParent(key,this.obj);
+              if(Array.isArray(obj)){
+                obj.splice( key, 1 );
+              }else{
+                delete obj[key];
+              }
+              //paintToTemplate(this.name);
+              if(element) element.remove();
             }
         };
         return model;
@@ -1044,27 +1054,62 @@ var iridium=function(customNamespace,startTag,endTag){
             );
             return promise;
         };
-        /**
-        *@deprecated
-        * //TODO remove this method when delete is checked
-        */
-        controller.prototype.remove=function(){
-            var objectController=this;
-            var promise=new Promise(
-                function(resolve,reject){
-                    //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
-                    ajaxJSON(objectController.url,"delete",undefined,objectController).then(
-                        function(data, textStatus, jqXHR){
-                            showLog("deleted");
-                            callCustomOK(objectController,c.remove);
-                            resolve(objectController);
-                        },
-                        function( jqXHR, textStatus, errorThrown ) {
-                            callCustomOK(objectController,c.remove);
-                            reject(objectController,errorThrown);
-                        }
-                    );
+
+
+        controller.prototype.add=function(element){
+          //TODO
+          let model=this.model;
+          let promise=new Promise(
+              function(resolve,reject){
+                try {
+                  model.set(null,null,element);
+                  resolve();
+                } catch (e) {
+                  reject(e);
                 }
+              }
+          );
+          return promise;
+        };
+        /**
+         *Remove an element from the view.Change model and view BUT not in the server (You must call update() later)
+         *@param {HTMLElement} element. The element that called the function. Any element is accepted, but inside the row you want to remove.
+         *@return {Promise}
+         */
+        controller.prototype.remove=function(element){
+          let name=this.name;
+
+          let model=this.model;
+          let promise=new Promise(
+              function(resolve,reject){
+                if(!Array.isArray(model.obj)){
+                  console.warn("Remove an object property is not a good idea");//remove a property is not a good idea. For instance: remove property type...bad
+                  reject();
+                }
+                let rowEl=null;
+                let el=element;
+                while(el && !rowEl){
+                    let parent=el.parentElement;
+                    if (parent.hasAttribute((c.data_model))&& parent.getAttribute(c.data_model)===name) rowEl=el;
+                    el=parent;
+                }
+                if (!rowEl){
+                  console.error("Error when removing element in template '"+name+"'. The child row was not found.");
+                  reject();
+                }else{
+                  let index=0;
+                  for (let i = 0; i < rowEl.parentElement.children.length; i++) {
+                    let child=rowEl.parentElement.children[i];
+                    if (child===rowEl){
+                      model.remove(index);
+                      break;
+                    }
+                    index++;
+                  }
+                  model.remove(index,rowEl);
+                }
+                resolve();
+              }
             );
             return promise;
         };
