@@ -1,0 +1,42 @@
+var removeTemplateNode=function(templateName,index){
+  let elTemplate=document.querySelector(cssAttribute(c.data_template,templateName));
+  if (elTemplate.elements.size>index){
+    let child= elTemplate.children[index];
+    if (!child.hasAttribute(c.data_skeleton)) child.remove();
+  }
+}
+
+controller.prototype.removeElement=function(element){
+  //if template type===array, guess the index
+  if(Array.isArray(this.model.obj)){
+    var children=element.parentNode.children;
+    let r=0;
+    for(let child of children){
+      if (child===element){
+        this.model.remove(r);
+        break;
+      }
+      r++;
+    }
+  }else{
+      ;
+  }
+  //
+};
+[]
+
+
+<div data-model="names">
+  <p>{{0.name}}</p>
+  <button onclick="{{remove()}}">delete</button>
+</div>
+
+remove():
+- template->remove=ir.controller('').removeElement(index);
+
+removeElement(index)
+-template,children.delete
+
+{{remove()}}
+- templateName?
+- index?
