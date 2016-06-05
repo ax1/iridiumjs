@@ -158,43 +158,45 @@ var iridium=function(customNamespace,startTag,endTag){
     }
 
     /**
-    * Look into an object,and find a deep property
+    * Look into an object,and find a deep property, then return the parent object
     * Example: obj={a:1,b:{b1:0,b2:8}} and key=b.b2
+    * @return {object or array} the parent object
     */
-    function getObjectProperty(key, object){
-    try{
+    function getObjectPropertyParent(key, object){
+      if (typeof(key)==='number') key=key.toString();
+      var obj=object;
+      try{
         var data = key.split('.');
-        if (data.length===1) return object[data];
+        if (data.length===1) return object;
         while(data.length>1){
-          object = object[data.shift()];
+          obj = obj[data.shift()];
         }
-        if (typeof(object)==='undefined') return undefined;
-        else return object[data];
+        return obj;
       }catch(error){
         console.error("No object found when looking for key='"+key+"'."+error);
-        return "";
+        return obj;
       }
     }
+
+    /**
+    * Look into an object,and find a deep property
+    * Example: obj={a:1,b:{b1:0,b2:8}} and key=b.b2
+    * @return {any} the value
+    */
+    function getObjectProperty(key, object){
+      var obj=getObjectPropertyParent(key, object);
+      if (typeof(obj)==='undefined') return undefined;
+      else return obj[key.split('.').pop()]||"";
+    }
+
     /**
     * Set a deep property value into an object
     * Note: if the property is not found, this method will create it
     * Example: obj={a:1,b:{b1:0,b2:8}} and key=b.b2 and value=10
     */
     function setObjectProperty(key, value, object){
-        var data = key.split('.');
-        var k;
-        var part;
-        while(data.length>1){
-            k=data.shift();
-            part=object[k];
-            if (part){
-                object=part;
-            }else {
-                object[k]={};
-                object=object[k];
-            }
-        }
-        object[data.shift()] = value;
+      var obj=getObjectPropertyParent(key, object);
+      obj[key.split('.').pop()] = value;
     }
 
     /**
