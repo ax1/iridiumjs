@@ -388,7 +388,12 @@ var iridium=function(customNamespace,startTag,endTag){
                     var modelName=prefix;
                     if (!modelName) modelName='';
                     //TODO add code when function instead of value
-                    return controllers[modelName].model.get(key);
+                    try{
+                      return controllers[modelName].model.get(key);
+                    }catch(err){
+                      console.error(err);
+                      return "ERROR";
+                    }
                 }
             }
         }
@@ -877,24 +882,34 @@ var iridium=function(customNamespace,startTag,endTag){
     var model=function(name){
 
         var model={
-            name:name,
-            obj:{} /*obj can be {} or []*/,
-            get:function(key){return getObjectProperty(key, this.obj);},
-            set:function(key,value){
-                //TODO:SECURITY, PREVENT CODE INJECTION
-                ///value=encodeURI(value);
-                setObjectProperty(key,value,this.obj);
-                paintToTemplate(this.name);
-            },
-            remove:function(key){
-              var obj=getObjectPropertyParent(key,this.obj);
-              if(Array.isArray(obj)){
-                obj.splice( key, 1 );
-              }else{
-                delete obj[key];
-              }
-              paintToTemplate(this.name);
+          name:name,
+          obj:{} /*obj can be {} or []*/,
+          get:function(key){return getObjectProperty(key, this.obj);},
+          set:function(key,value){
+            //TODO:SECURITY, PREVENT CODE INJECTION
+            ///value=encodeURI(value);
+            setObjectProperty(key,value,this.obj);
+            paintToTemplate(this.name);
+          },
+          add:function(key,value){
+            var obj=getObjectPropertyParent(key,this.obj);
+            if(Array.isArray(obj)){
+              obj.splice(key,0,value);
+            }else{
+              obj[key]=value;
             }
+            paintToTemplate(this.name);
+          },
+          remove:function(key){
+            var obj=getObjectPropertyParent(key,this.obj);
+            if(Array.isArray(obj)){
+              obj.splice( key, 1 );
+            }else{
+              delete obj[key];
+            }
+            paintToTemplate(this.name);
+          }
+
         };
         return model;
     };
@@ -1033,14 +1048,13 @@ var iridium=function(customNamespace,startTag,endTag){
         };
 
 
-        controller.prototype.add=function(element){
-          //TODO
+        controller.prototype.add=function(key,value){
+          let controller=this;
           let model=this.model;
           let promise=new Promise(
               function(resolve,reject){
                 try {
-
-                  model.set(null,null,element);
+                  model.add(key,value);
                   resolve(controller);
                 } catch (e) {
                   reject(controller,e);
