@@ -6,17 +6,28 @@
     <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
     <script src="iridium.js"></script>
     <script>
-      function removeRow(){
-        ir.model('names').delete(0);
+      function checkFooter(controller){
+        if (controller.model.obj.length<=0) document.querySelector('footer').style.display='none';
+      }
+      function add(){
+        ir.controller('names').add("tone");
       }
     </script>
   </head>
+
+
   <body>
-    <div data-model='names' data-provider='["pep","john"]'>
-      <div>my name is {{0}} <button onclick="{{remove()}}">remove</button></div>
+    <div data-model='new-name' data-provider='{"name":"aaa"}'>
+      <input value='{{name}}'></input>
     </div>
+    <div data-model='names' data-provider='["pep","john"]'>
+      <div>my name is {{0}} <button onclick="{{remove()}}.then(checkFooter)">remove {{new-name:name}}</button></div>
+    </div>
+    <div><button onclick="addRow">add</button></div>
     <footer style="position:fixed;bottom:0;background-color:blue;left:0;right:0">
       <h1> The footer should be hidden when no names </h1>
     </footer>
   </body>
+
+
 </html>

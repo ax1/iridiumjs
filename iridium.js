@@ -465,7 +465,7 @@ var iridium=function(customNamespace,startTag,endTag){
         /**
          * parse {{}} in attributes
          */
-        function parseAttributes(isTemplateInited,templateName, el,jEl, object){
+        function parseAttributes(templateName, el,jEl, object){
 
             function parseAttribute(attr){
                 if (attr.value.indexOf(tag1)===-1) return;//if nothing to process->exit as fast as possible
@@ -484,18 +484,9 @@ var iridium=function(customNamespace,startTag,endTag){
                 //----------------------------------------------------------
                 //      if real attribute->set real values
                 //----------------------------------------------------------
-                if(jEl.attr(realAttrName)){
-                    //check if 'onevent' property
-                        //if true and templateInited do nothing
-                        //else add processed text
-                    var pos=realAttrName.indexOf("on");
-                    if (pos>-1 && isTemplateInited===true){
-                        //nothing
-                    }else{
-                        if(jEl.attr(realAttrName)!==expression) {jEl.attr(realAttrName,expression);}
-                    }
+                if(jEl.attr(realAttrName) && jEl.attr(realAttrName)!==expression) {
+                  jEl.attr(realAttrName,expression);
                 }
-
                 //----------------------------------------------------------
                 //       if value->insert into nodeText
                 //----------------------------------------------------------
@@ -506,9 +497,8 @@ var iridium=function(customNamespace,startTag,endTag){
                             jEl.attr(c.data_bind,res.expression);
                             jEl.val(res.newText);
                             jEl.on("input change inputText",function(event){
-                                console.debug('a');
                                 var val=$(this).val();
-                                controllers[templateName].model.set($(this).attr("data-bind"),val); //TODO ARF 13-10-15 check if event propagation is suitable (see $.on documentation). And check if it is better performance solution thant the corrent one snce every time a new input is created, it should update model , the tag itsself, etc. Mayby the curent solution is already the good one.
+                                controllers[templateName].model.set($(this).attr("data-bind"),val); //TODO ARF 13-10-15 check if event propagation is suitable (see $.on documentation). And check if it is better performance solution that the current one since every time a new input is created, it should update model , the tag itself, etc. Maybe the curent solution is already the good one.
                             });
                         }
                     }else{
@@ -518,9 +508,8 @@ var iridium=function(customNamespace,startTag,endTag){
 
             }
 
-            function parseALLAttributes(isTemplateInited,templateName, el,jEl){
-                //initialize the first time
-                if(!isTemplateInited){
+            function parseALLAttributes(templateName, el,jEl){
+                //create the data-* if not presented
                     for(var i=0;i<el.attributes.length;i++){
                         var attr=el.attributes[i];
                         if(attr.value.indexOf(tag1)>-1){
@@ -534,7 +523,6 @@ var iridium=function(customNamespace,startTag,endTag){
                             }
                         }
                     }
-                }
                 //lookup in ATTRIBUTES
                 for(var r=0;r<el.attributes.length;r++){
                     parseAttribute(el.attributes[r]);
@@ -542,39 +530,36 @@ var iridium=function(customNamespace,startTag,endTag){
             }
 
 
-            parseALLAttributes(isTemplateInited,templateName, el,jEl);
+            parseALLAttributes(templateName, el,jEl);
         }
 
         /**
          * parse {{}} in element contents
          */
-        function parseContent(isTemplateInited,templateName, el,jEl, object){
-            if(!isTemplateInited){
-                //if not inited create the <span> nodes
-                var nodes=el.childNodes;
-                for (var r=0;r<nodes.length;r++){
-                    var node=nodes[r];
-                    //IF TEXT
-                    if (node.nodeType==3){
-                        if (node.data.indexOf(tag1)===-1) continue;
-                        var res=lookupExpression(templateName,node.data,object);
-                        if(res && res.found){
-                            var node1=document.createTextNode(res.oldText.substring(0,res.index1));
-                            var node2=document.createElement("span");node2.setAttribute("data-value",tag1+res.expression+tag2);node2.data=res.value;
-                            var node3=document.createTextNode(res.oldText.substring(res.index2));
-                            node.parentNode.insertBefore(node1,node);node.parentNode.insertBefore(node2,node);node.parentNode.insertBefore(node3,node);
-                            node.parentNode.removeChild(node);
-                            r=0;//reset loop
-                        }
-                    }//END IF TEXT
-                }
+        function parseContent(templateName, el,jEl, object){
+          var nodes=el.childNodes;
+          for (var r=0;r<nodes.length;r++){
+            var node=nodes[r];
+            if (node.nodeType==3){//IF TEXT
+              if (node.data.indexOf(tag1)===-1) continue;
+              var res=lookupExpression(templateName,node.data,object);
+              //if {{}} create the <span> nodes
+              if(res && res.found){
+                var node1=document.createTextNode(res.oldText.substring(0,res.index1));
+                var node2=document.createElement("span");node2.setAttribute("data-value",tag1+res.expression+tag2);node2.data=res.value;
+                var node3=document.createTextNode(res.oldText.substring(res.index2));
+                node.parentNode.insertBefore(node1,node);node.parentNode.insertBefore(node2,node);node.parentNode.insertBefore(node3,node);
+                node.parentNode.removeChild(node);
+                r=0;//reset loop
+              }
             }
+          }
         }
 
         /**
          * parse {{}} in child elements
          */
-        function parseChildren(isTemplateInited,templateName, el,jEl, object){
+        function parseChildren(templateName, el,jEl, object){
             //lookup in CHILD ELEMENTS
             if(el.children.length>0){
                 for(var s=0;s<el.children.length;s++){
@@ -584,7 +569,7 @@ var iridium=function(customNamespace,startTag,endTag){
                     } else if(elChild.attributes[c.data_skeleton]){
                       // do not process data-skeleton
                     }else {
-                      paintNodes(isTemplateInited,templateName,elChild,$(elChild),object);
+                      paintNodes(templateName,elChild,$(elChild),object);
                     }
                 }
             }
@@ -670,7 +655,6 @@ var iridium=function(customNamespace,startTag,endTag){
             }
             var elTemplate=jTemplate[0];
             if(!elTemplate) return;
-            var isTemplateInited=false;
             //if the parent template is not inited yet, wait for initialization before painting this templates
             var jParent=jTemplate.parents(cssAttribute(c.data_model));
             if(jParent.length>0){
@@ -679,7 +663,6 @@ var iridium=function(customNamespace,startTag,endTag){
                     return;//exit and wait, this template will be painted when its parent template is ready to process the content
                 }
             }
-
             var newTemplate=checkDynamicTemplateName(templateName, elTemplate);
             if(templateName!==newTemplate){
                 //dynamic template, the controller has been configured and it will call this method later, so exit.
@@ -690,15 +673,11 @@ var iridium=function(customNamespace,startTag,endTag){
                 return; //asynchronous call-wait for configuration process finished. When the controller has retrieve data, it will call paintToTemplate again
             }
             var object=controllers[templateName].model.obj;
-            if(jTemplate.attr(c.data_status)){isTemplateInited=true;}
-            //if(!(el instanceof HTMLElement)) el=$(el)[0];//TODO check if this line is still a valid functionality
-            if(isTemplateInited) console.debug("painting template '" +templateName+"'");
-            else console.debug("initializing & painting template '" +templateName+"'");
+            console.debug("painting template '" +templateName+"'");
             //paint nodes
-            paintNodes(isTemplateInited,templateName,elTemplate,jTemplate,object);
-
+            paintNodes(templateName,elTemplate,jTemplate,object);
             //if template was not inited yet->all processed->mark as inited
-            if(isTemplateInited===false){
+            if(!jTemplate.attr(c.data_status)){
                 jTemplate.attr(c.data_status,"inited");
             }
         }
@@ -706,49 +685,48 @@ var iridium=function(customNamespace,startTag,endTag){
         /**
          * Check type of data (array, object) and process nodes.
          * Note: the template syntax is not replaced, new attributes are created in elements, to keep thant syntax while replacing with real data
-         * @param isTemplateInited
          * @param templateName the name of the template that is currently processed
          * @param el the DOM element to be processed, el can be a dom object OR a css selector
          * @param jEl the $(el), passed as param just for performance purposes
          * @param object the data from the model to be inserted into the DOM
          * @param el the DOM element to be processed, el can be a dom object or a css selector
          */
-        function paintNodes(isTemplateInited,templateName,el,jEl,object){
+        function paintNodes(templateName,el,jEl,object){
             if(!(el instanceof HTMLElement)){//TODO review this if (maybe deprecated)
                  el=$(el)[0];
                 jEl=$(el);
             }
             //(el.attributes[c.data_skeleton]) return;//if skeleton, do nothing
             if(object instanceof Array && el.hasAttribute(c.data_model)){
-                var array=object;
+                let array=object;
                 //if template not processed, copy all child nodes into a hidden container
-                if (isTemplateInited===false){
+                let elSkeleton=el.querySelector(cssAttribute(c.data_skeleton));
+                if (!elSkeleton){
                     //create skeleton
-                    let elSkeleton=document.createElement("div");
+                    elSkeleton=document.createElement("div");
                     elSkeleton.style.display="none";
                     elSkeleton.setAttribute(c.data_skeleton,"");
                     while (el.children.length>0){elSkeleton.appendChild(el.children[0]);}
                     el.appendChild(elSkeleton);
                 }
                 //create the list elements
-                let elSkeleton=el.querySelector(cssAttribute(c.data_skeleton));
-                var skeleton=elSkeleton.innerHTML;
-                var text="";
-                array.forEach(function (item, index,arr){
-                    var newText=skeleton.replace(/\{\{0}}/g,"{{"+index+"}}");
+                let skeleton=elSkeleton.innerHTML;
+                let text="";
+                array.forEach(function (item,index,arr){
+                    let newText=skeleton.replace(/\{\{0}}/g,"{{"+index+"}}");
                     newText=newText.replace(/\{\{0\./g,"{{"+index+".");
                     text=text+newText;
                 });
                 el.innerHTML=text+elSkeleton.outerHTML;
                 //if skeleton then bypass
-                var nodeList=elSkeleton.querySelectorAll(cssAttribute(c.data_model));
-                for(var s=0;s<nodeList.length;s++){nodeList[s].setAttribute(c.data_status,"inited");}//TODO check if keeping the skeleton is useful, or remove it
+                let nodeList=elSkeleton.querySelectorAll(cssAttribute(c.data_model));
+                for(let s=0;s<nodeList.length;s++){nodeList[s].setAttribute(c.data_status,"inited");}
                 //continue with child elements
-                parseChildren(isTemplateInited,templateName, el,jEl, object);
+                parseChildren(templateName, el,jEl, object);
             }else{
-                parseAttributes(isTemplateInited,templateName, el,jEl, object);
-                parseContent(isTemplateInited,templateName, el,jEl, object);
-                parseChildren(isTemplateInited,templateName, el,jEl, object);
+                parseAttributes(templateName, el,jEl, object);
+                parseContent(templateName, el,jEl, object);
+                parseChildren(templateName, el,jEl, object);
             }
 
         }
@@ -908,15 +886,14 @@ var iridium=function(customNamespace,startTag,endTag){
                 setObjectProperty(key,value,this.obj);
                 paintToTemplate(this.name);
             },
-            remove:function(key,element){
+            remove:function(key){
               var obj=getObjectPropertyParent(key,this.obj);
               if(Array.isArray(obj)){
                 obj.splice( key, 1 );
               }else{
                 delete obj[key];
               }
-              //paintToTemplate(this.name);
-              if(element) element.remove();
+              paintToTemplate(this.name);
             }
         };
         return model;
@@ -1062,6 +1039,7 @@ var iridium=function(customNamespace,startTag,endTag){
           let promise=new Promise(
               function(resolve,reject){
                 try {
+
                   model.set(null,null,element);
                   resolve(controller);
                 } catch (e) {
@@ -1072,7 +1050,7 @@ var iridium=function(customNamespace,startTag,endTag){
           return promise;
         };
         /**
-         *Remove an element from the view.Change model and view BUT not in the server (You must call update() later)
+         *Remove an element from the view. Change model and view BUT not in the server (You must call update() to save changes)
          *@param {HTMLElement} element. The element that called the function. Any element is accepted, but inside the row you want to remove.
          *@return {Promise}
          */
@@ -1090,7 +1068,7 @@ var iridium=function(customNamespace,startTag,endTag){
                 let el=element;
                 while(el && !rowEl){
                     let parent=el.parentElement;
-                    if (parent.hasAttribute((c.data_model))&& parent.getAttribute(c.data_model)===name) rowEl=el;
+                    if (parent.hasAttribute((c.data_model)) && parent.getAttribute(c.data_model)===name) rowEl=el;
                     el=parent;
                 }
                 if (!rowEl){
@@ -1106,7 +1084,6 @@ var iridium=function(customNamespace,startTag,endTag){
                     }
                     index++;
                   }
-                  model.remove(index,rowEl);
                 }
                 resolve(controller);
               }
