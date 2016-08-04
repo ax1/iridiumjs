@@ -24,6 +24,7 @@ var iridium=function(customNamespace,startTag,endTag){
         data_provider:"data-provider",
         data_event:"data-event",
         data_load:"data-load",
+        data_options:"data-options",
         data_:"data-",
         create:"create",
         read:"read",
@@ -628,6 +629,7 @@ var iridium=function(customNamespace,startTag,endTag){
         function checkIfControllerIsConfiguredAndReady(templateName,elTemplate){
             var model=templateName;
             var provider=elTemplate.getAttribute(c.data_provider);
+            var options=elTemplate.getAttribute(c.data_options);
             if(!provider){//if not configured in html mode, it must be configured in javascript mode
                 if (!controllers[model]) {
                     console.warn( "there is no controller for "+templateName+". Check if ["+c.data_provider+"] or ir.controller(name).configure(url) exists");
@@ -637,7 +639,7 @@ var iridium=function(customNamespace,startTag,endTag){
             if(provider && !controllers[model]){
                 var cr=controller(model);
                 controllers[model]=cr;
-                cr.configure(provider);
+                cr.configure(provider,null,options);
                 return false;
             }else{
                 if (controllers[model].isReady) return true;
@@ -879,7 +881,7 @@ var iridium=function(customNamespace,startTag,endTag){
     //------------------------------------------------------------------
     //    CONTROLLERS
     //------------------------------------------------------------------
-    var model=function(name){
+    var model=function(name,controller){
 
         var model={
           name:name,
@@ -889,7 +891,7 @@ var iridium=function(customNamespace,startTag,endTag){
             //TODO:SECURITY, PREVENT CODE INJECTION
             ///value=encodeURI(value);
             setObjectProperty(key,value,this.obj);
-            paintToTemplate(this.name);
+            this.execute();
           },
           add:function(key,value){
             var obj=getObjectPropertyParent(key,this.obj);
@@ -898,7 +900,7 @@ var iridium=function(customNamespace,startTag,endTag){
             }else{
               obj[key]=value;
             }
-            paintToTemplate(this.name);
+            this.execute();
           },
           remove:function(key){
             var obj=getObjectPropertyParent(key,this.obj);
@@ -907,9 +909,13 @@ var iridium=function(customNamespace,startTag,endTag){
             }else{
               delete obj[key];
             }
-            paintToTemplate(this.name);
+            this.execute();
+          },
+          execute(){
+            if(controller.options.indexOf("autosave")>-1){
+              controller.update().then((controller)=>paintToTemplate(controller.name));
+            }else paintToTemplate(this.name);
           }
-
         };
         return model;
     };
@@ -919,9 +925,10 @@ var iridium=function(customNamespace,startTag,endTag){
         function controller(name){
             this.name=name;
             this.url=undefined;
-            this.model=model(name);
+            this.model=model(name,this);
             this.template=cssAttribute(c.data_model,this.name);
             this.isReady=false;
+            this.options=undefined;
             this.customMethods={};
         }
 
@@ -1177,14 +1184,16 @@ var iridium=function(customNamespace,startTag,endTag){
             );
             return promise;
         };
-        controller.prototype.configure=function(urlOrObject,customMethods){
-            //set params
+        controller.prototype.configure=function(urlOrObject,customMethods,options){
             this.url=urlOrObject;
-            if(customMethods){
-                this.customMethods=customMethods;
+            this.options=options;
+            if(customMethods) this.customMethods=customMethods;
+            if(options) this.options=options; else this.options='';
+            if (this.options.indexOf("autoload")>-1){
+              setInterval(()=>this.read(),1000);
+            }else{
+              return this.read();
             }
-            //retrieve data
-            return this.read();
         };
         controller.prototype._destroy=function(){
             //TODO check if <input> binds are destroyed as well

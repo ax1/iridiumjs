@@ -10,7 +10,20 @@
         if (controller.model.obj.length<=0) document.querySelector('footer').style.display='none';
       }
       function add(event){
-        if (event.keyCode===13) ir.controller('names').add(0,event.target.value);
+        if (event.keyCode===13){
+          var value=event.target.value;
+          if (value==="")return;
+          ir.controller('names').add(0,value).then(()=>{event.target.value='';});
+        }
+      }
+
+      function addFlag(event){
+        if (event.keyCode===13){
+          var value=event.target.value;
+          if (value==="")return;
+          ir.controller('flags').add(0,value)
+            .then(()=>{event.target.value=''});//.then(controller=>controller.update())
+        }
       }
     </script>
   </head>
@@ -20,10 +33,15 @@
     <div data-model='names' data-provider='["pep","john"]'>
       <div>my name is {{0}} <button onclick="{{remove()}}.then(checkFooter)">remove</button></div>
     </div>
-    <div><input onkeyup="add(event)" name='new-name' placeholder="new name"></input></div>
+    <div><input onkeypress="add(event)" name='new-name' placeholder="new name" autofocus></input></div>
     <footer style="position:fixed;bottom:0;background-color:blue;left:0;right:0">
       <h1> The footer should be hidden when no names </h1>
     </footer>
+    <p></p>
+    <div data-model='flags' data-provider='localStorage/flags' data-options='autosave autoload'>
+      <div>{{0}}</div>
+    </div>
+    <div><input onkeypress="addFlag(event)" name='new-flaw' placeholder="new flag" autofocus></input></div>
   </body>
 
 
