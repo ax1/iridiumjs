@@ -1190,6 +1190,7 @@ var iridium=function(customNamespace,startTag,endTag){
             if(customMethods) this.customMethods=customMethods;
             if(options) this.options=options; else this.options='';
             if (this.options.indexOf("autoload")>-1){
+              this.read();//call first direct to avoid delay
               setInterval(()=>this.read(),1000);
             }else{
               return this.read();
