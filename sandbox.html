@@ -7,7 +7,7 @@
     <script src="iridium.js"></script>
     <script>
       function checkFooter(controller){
-        if (controller.model.obj.length<=0) document.querySelector('footer').style.display='none';
+        if (controller.model.length<=0) document.querySelector('footer').style.display='none';
       }
       function add(event){
         if (event.keyCode===13){
@@ -16,7 +16,6 @@
           ir.controller('names').add(0,value).then(()=>{event.target.value='';});
         }
       }
-
       function addFlag(event){
         if (event.keyCode===13){
           var value=event.target.value;
@@ -38,10 +37,10 @@
       <h1> The footer should be hidden when no names </h1>
     </footer>
     <p></p>
-    <div data-model='flags' data-provider='localStorage/flags' data-options='autosave autoload'>
+    <div data-model='flags' data-provider='localStorage/flags' data-options='autosave autorefresh'>
       <div>{{0}}</div>
     </div>
-    <div><input onkeypress="addFlag(event)" name='new-flaw' placeholder="new flag" autofocus></input></div>
+    <div><input onkeypress="addFlag(event)" name='new-flag' placeholder="new flag" autofocus></input></div>
   </body>
 
 

@@ -1193,7 +1193,7 @@ var iridium=function(customNamespace,startTag,endTag){
             this.options=options;
             if(customMethods) this.customMethods=customMethods;
             if(options) this.options=options; else this.options='';
-            if (this.options.indexOf("autoload")>-1){
+            if (this.options.indexOf("autorefresh")>-1){
               this.read();//call first direct to avoid delay
               setInterval(()=>this.read(),1000);
             }else{
@@ -1204,7 +1204,6 @@ var iridium=function(customNamespace,startTag,endTag){
             //TODO check if <input> binds are destroyed as well
             delete controllers[this.name];
         };
-
         //return function
         if(controllers[name]){
             return     controllers[name];
