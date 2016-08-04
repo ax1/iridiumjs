@@ -1231,11 +1231,11 @@ var iridium=function(customNamespace,startTag,endTag){
     })();
 
     var showLog=function(text){
-        $("#"+c.layerLog).css("background-color","lime").text(text).slideDown();
+        $("#"+c.layerLog).css("background-color","lime").text(text).slideDown().delay(2000).slideUp();
     };
     var showErrorLog=function(error){
         console.error(error);
-        $("#"+c.layerLog).css("background-color","red").text(error).slideDown();
+        $("#"+c.layerLog).css("background-color","red").text(error).slideDown().delay(2000).slideUp();
     };
     var hideLog=function(){
         var $el=$("#"+c.layerLog);
