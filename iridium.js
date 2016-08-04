@@ -915,6 +915,10 @@ var iridium=function(customNamespace,startTag,endTag){
             if(controller.options.indexOf("autosave")>-1){
               controller.update().then((controller)=>paintToTemplate(controller.name));
             }else paintToTemplate(this.name);
+          },
+          get length(){
+            if (this.obj===undefined || this.obj===null) return -1;
+            else return this.obj.length;
           }
         };
         return model;
