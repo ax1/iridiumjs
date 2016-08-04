@@ -943,7 +943,22 @@ var iridium=function(customNamespace,startTag,endTag){
             var promise=new Promise(
                 function(resolve,reject){
                     //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
-                        ajaxJSON(objectController.url,"post",JSON.stringify(objectController.model.obj),objectController).then(
+                    var url=objectController.url;
+                    var storage;
+                    if (url.startsWith("localStorage/")){
+                      storage=localStorage;
+                    } else if (url.startsWith("sessionStorage/")){
+                      storage=sessionStorage;
+                    }
+                    //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
+                    if (storage){
+                      let key=url.substring(url.indexOf('/')+1);
+                      storage.setItem(key,JSON.stringify(objectController.model.obj));
+                      showLog("created");
+                      callCustomOK(objectController,c.create);
+                      resolve(objectController);
+                    }else{
+                      ajaxJSON(objectController.url,"post",JSON.stringify(objectController.model.obj),objectController).then(
                         function(data, textStatus,jqXHR){
                             showLog("created");
                             callCustomOK(objectController,c.create);
@@ -953,7 +968,9 @@ var iridium=function(customNamespace,startTag,endTag){
                             callCustomERROR(objectController,c.create);
                             reject(objectController,errorThrown);
                         }
-                    );
+                      );
+                    }
+
                 }
             );
             return promise;
@@ -967,7 +984,7 @@ var iridium=function(customNamespace,startTag,endTag){
                     var isObject=false;
                     if (typeof objectController.url=='object'){
                         isObject=true;
-                    }else    if (objectController.url.startsWith("{") || objectController.url.startsWith("[")){
+                    }else if (objectController.url.startsWith("{") || objectController.url.startsWith("[")){
                         try{
                             objectController.url=JSON.parse(objectController.url);
                             isObject=true;
@@ -985,22 +1002,45 @@ var iridium=function(customNamespace,startTag,endTag){
                         callCustomOK(objectController,c.read);
                         resolve(objectController);
                     }else{
-                        var url=objectController.url;
-                        var processed=lookupExpression(objectController.name,objectController.url,objectController.model.obj);
-                        if (processed) url=processed.newText;
+                      var processed=lookupExpression(objectController.name,objectController.url,objectController.model.obj);
+                      if (processed) objectController.url=processed.newText;
+                      var url=objectController.url;
+                      var storage;
+                      if (url.startsWith("localStorage/")){
+                        storage=localStorage;
+                      } else if (url.startsWith("sessionStorage/")){
+                        storage=sessionStorage;
+                      }
+                      if (storage){
+                        let key=url.substring(url.indexOf('/')+1);
+                        let objectType;
+                        //if model is plural, it should be array
+                        if (key.length>1 && key.substring(key.length-1).toLowerCase()==='s') objectType="[]"; else objectType="{}";
+                        let value=storage.getItem(key);
+                        if (!value){
+                          value=objectType;
+                          storage.setItem(key,value);
+                        }
+                        objectController.model.obj=JSON.parse(value);
+                        objectController.isReady=true;
+                        paintToTemplate(objectController.name);
+                        callCustomOK(objectController,c.read);
+                        resolve(objectController);
+                      }else{
                         var aj=ajaxJSON(url,"get",undefined,objectController);
                         aj.then(
-                            function(data, textStatus, jqXHR){
-                                objectController.model.obj=data;
-                                objectController.isReady=true;
-                                paintToTemplate(objectController.name);
-                                callCustomOK(objectController,c.read);
-                                resolve(objectController);
-                            },
-                            function( jqXHR, textStatus, errorThrown ) {
-                                callCustomERROR(objectController,c.read);
-                                reject(objectController,errorThrown);
-                            });
+                          function(data, textStatus, jqXHR){
+                            objectController.model.obj=data;
+                            objectController.isReady=true;
+                            paintToTemplate(objectController.name);
+                            callCustomOK(objectController,c.read);
+                            resolve(objectController);
+                          },
+                          function( jqXHR, textStatus, errorThrown ) {
+                            callCustomERROR(objectController,c.read);
+                            reject(objectController,errorThrown);
+                        });
+                      }
                     }
                 }
             );
@@ -1010,7 +1050,21 @@ var iridium=function(customNamespace,startTag,endTag){
             var objectController=this;
             var promise=new Promise(
                 function(resolve,reject){
-                    //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
+                  var url=objectController.url;
+                  var storage;
+                  if (url.startsWith("localStorage/")){
+                    storage=localStorage;
+                  } else if (url.startsWith("sessionStorage/")){
+                    storage=sessionStorage;
+                  }
+                  //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
+                  if (storage){
+                    let key=url.substring(url.indexOf('/')+1);
+                    storage.setItem(key,JSON.stringify(objectController.model.obj));
+                    showLog("updated");
+                    callCustomOK(objectController,c.update);
+                    resolve(objectController);
+                  }else{
                     ajaxJSON(objectController.url,"put",JSON.stringify(objectController.model.obj),objectController).then(
                         function(data, textStatus, jqXHR){
                             showLog("updated");
@@ -1022,6 +1076,8 @@ var iridium=function(customNamespace,startTag,endTag){
                             reject(objectController,errorThrown);
                         }
                     );
+                  }
+
                 }
             );
             return promise;
@@ -1031,17 +1087,34 @@ var iridium=function(customNamespace,startTag,endTag){
             var promise=new Promise(
                 function(resolve,reject){
                     //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
-                    ajaxJSON(objectController.url,"delete",undefined,objectController).then(
-                        function(data, textStatus, jqXHR){
-                            showLog("deleted");
-                            callCustomOK(objectController,c.delete);
-                            resolve(objectController);
-                        },
-                        function( jqXHR, textStatus, errorThrown ) {
-                            callCustomOK(objectController,c.delete);
-                            reject(objectController,errorThrown);
-                        }
-                    );
+                    var url=objectController.url;
+                    var storage;
+                    if (url.startsWith("localStorage/")){
+                      storage=localStorage;
+                    } else if (url.startsWith("sessionStorage/")){
+                      storage=sessionStorage;
+                    }
+                    //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
+                    if (storage){
+                      let key=url.substring(url.indexOf('/')+1);
+                      storage.removeItem(key);
+                      showLog("deleted");
+                      callCustomOK(objectController,c.delete);
+                      resolve(objectController);
+                    }else{
+                      ajaxJSON(objectController.url,"delete",undefined,objectController).then(
+                          function(data, textStatus, jqXHR){
+                              showLog("deleted");
+                              callCustomOK(objectController,c.delete);
+                              resolve(objectController);
+                          },
+                          function( jqXHR, textStatus, errorThrown ) {
+                              callCustomOK(objectController,c.delete);
+                              reject(objectController,errorThrown);
+                          }
+                      );
+                    }
+
                 }
             );
             return promise;
