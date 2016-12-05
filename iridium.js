@@ -258,6 +258,15 @@ var iridium=function(customNamespace,startTag,endTag){
       });
     }
 
+    /*
+    ██       ██████   █████  ██████
+    ██      ██    ██ ██   ██ ██   ██
+    ██      ██    ██ ███████ ██   ██
+    ██      ██    ██ ██   ██ ██   ██
+    ███████  ██████  ██   ██ ██████
+    */
+
+
     /**
      * Load an html/js page (generic method)
      */
@@ -344,6 +353,15 @@ var iridium=function(customNamespace,startTag,endTag){
         $(selector).empty();
     }
 
+    /*
+████████ ███████ ███    ███ ██████  ██       █████  ████████ ███████ ███████
+   ██    ██      ████  ████ ██   ██ ██      ██   ██    ██    ██      ██
+   ██    █████   ██ ████ ██ ██████  ██      ███████    ██    █████   ███████
+   ██    ██      ██  ██  ██ ██      ██      ██   ██    ██    ██           ██
+   ██    ███████ ██      ██ ██      ███████ ██   ██    ██    ███████ ███████
+*/
+
+
     //------------------------------------------------------------------
     //    TEMPLATE FUNCTIONS
     //------------------------------------------------------------------
@@ -364,6 +382,7 @@ var iridium=function(customNamespace,startTag,endTag){
             if(key==="$queryString" || key==="$querystring") return queryString();
             var index=key.indexOf(":");
             if(index<0){
+              //--------CURRENT MODEL----------------
                 //key is a function instead a value.if function() with no params, add 'this' object, for magic features
                 var pos=key.indexOf("(");
                 if(pos>-1){
@@ -373,6 +392,7 @@ var iridium=function(customNamespace,startTag,endTag){
                     return getObjectProperty( key, object);
                 }
             }else{
+              //---------EXTERNAL MODEL--------------
                 var prefix=key.substring(0,index);
                 key=key.substring(index+1);
                 if(prefix.indexOf("$")>-1){
@@ -754,9 +774,14 @@ var iridium=function(customNamespace,startTag,endTag){
     //var models; models are already in sessionStorage
     //var templates; templates are already in the html files
 
-    //------------------------------------------------------------------
-    // SESSION
-    //------------------------------------------------------------------
+    /*
+███████ ███████ ███████ ███████ ██  ██████  ███    ██
+██      ██      ██      ██      ██ ██    ██ ████   ██
+███████ █████   ███████ ███████ ██ ██    ██ ██ ██  ██
+     ██ ██           ██      ██ ██ ██    ██ ██  ██ ██
+███████ ███████ ███████ ███████ ██  ██████  ██   ████
+*/
+
     //Session is intended to keep data (not in the url) between pages or when refreshing the page. I.e: the user id if the user is logged
     //Session is different than headers & cookies since these ones are sent to the server on each request
 
@@ -789,9 +814,14 @@ var iridium=function(customNamespace,startTag,endTag){
         };
     }();
 
-    //------------------------------------------------------------------
-    // ROUTERS
-    //------------------------------------------------------------------
+    /*
+    ██████   ██████  ██    ██ ████████ ███████ ██████  ███████
+    ██   ██ ██    ██ ██    ██    ██    ██      ██   ██ ██
+    ██████  ██    ██ ██    ██    ██    █████   ██████  ███████
+    ██   ██ ██    ██ ██    ██    ██    ██      ██   ██      ██
+    ██   ██  ██████   ██████     ██    ███████ ██   ██ ███████
+    */
+
     var router=function(name){
         if (routers[name]){
             return routers[name];
@@ -879,9 +909,15 @@ var iridium=function(customNamespace,startTag,endTag){
         }
     }
 
-    //------------------------------------------------------------------
-    //    subscriptions
-    //------------------------------------------------------------------
+    /*
+    ███████ ██    ██ ██████  ███████  ██████ ██████  ██ ██████  ████████ ██  ██████  ███    ██ ███████
+    ██      ██    ██ ██   ██ ██      ██      ██   ██ ██ ██   ██    ██    ██ ██    ██ ████   ██ ██
+    ███████ ██    ██ ██████  ███████ ██      ██████  ██ ██████     ██    ██ ██    ██ ██ ██  ██ ███████
+         ██ ██    ██ ██   ██      ██ ██      ██   ██ ██ ██         ██    ██ ██    ██ ██  ██ ██      ██
+    ███████  ██████  ██████  ███████  ██████ ██   ██ ██ ██         ██    ██  ██████  ██   ████ ███████
+    */
+
+
     var subscriptions={
       obj:{},
       get:function(topic){
@@ -902,13 +938,17 @@ var iridium=function(customNamespace,startTag,endTag){
           }
         }
       }
-
     }
 
+    /*
+     ██████  ██████  ███    ██ ████████ ██████   ██████  ██      ██      ███████ ██████  ███████
+    ██      ██    ██ ████   ██    ██    ██   ██ ██    ██ ██      ██      ██      ██   ██ ██
+    ██      ██    ██ ██ ██  ██    ██    ██████  ██    ██ ██      ██      █████   ██████  ███████
+    ██      ██    ██ ██  ██ ██    ██    ██   ██ ██    ██ ██      ██      ██      ██   ██      ██
+     ██████  ██████  ██   ████    ██    ██   ██  ██████  ███████ ███████ ███████ ██   ██ ███████
+    */
 
-    //------------------------------------------------------------------
-    //    CONTROLLERS
-    //------------------------------------------------------------------
+
     var model=function(name,controller){
 
         var model={
@@ -1245,11 +1285,14 @@ var iridium=function(customNamespace,startTag,endTag){
         }
     };
 
+    /*
+    ███████ ███████  ██████ ██    ██ ██████  ██ ████████ ██    ██
+    ██      ██      ██      ██    ██ ██   ██ ██    ██     ██  ██
+    ███████ █████   ██      ██    ██ ██████  ██    ██      ████
+         ██ ██      ██      ██    ██ ██   ██ ██    ██       ██
+    ███████ ███████  ██████  ██████  ██   ██ ██    ██       ██
+    */
 
-
-    //------------------------------------------------------------------
-    //    SECURITY
-    //------------------------------------------------------------------
 
     var _security=(function(){
         function _isAuthenticated(){
@@ -1301,10 +1344,24 @@ var iridium=function(customNamespace,startTag,endTag){
         insertHeaders();
     }
 
-    //initialize
+    /*
+    ██ ███    ██ ██ ████████ ██  █████  ██      ██ ███████ ███████
+    ██ ████   ██ ██    ██    ██ ██   ██ ██      ██    ███  ██
+    ██ ██ ██  ██ ██    ██    ██ ███████ ██      ██   ███   █████
+    ██ ██  ██ ██ ██    ██    ██ ██   ██ ██      ██  ███    ██
+    ██ ██   ████ ██    ██    ██ ██   ██ ███████ ██ ███████ ███████
+    */
+
     init();
     ////////////////////////////////////////////////////////////////////
 
+    /*
+    ██ ██████       ██████  ██████       ██ ███████  ██████ ████████
+    ██ ██   ██     ██    ██ ██   ██      ██ ██      ██         ██
+    ██ ██████      ██    ██ ██████       ██ █████   ██         ██
+    ██ ██   ██     ██    ██ ██   ██ ██   ██ ██      ██         ██
+    ██ ██   ██      ██████  ██████   █████  ███████  ██████    ██
+    */
 
     return {
         start:function(){
@@ -1369,6 +1426,14 @@ var iridium=function(customNamespace,startTag,endTag){
 
 var $ir=iridium;//built-in shortcut
 var ir=$ir;//built-in shortcut;
+
+/*
+███████ ████████  █████  ██████  ████████
+██         ██    ██   ██ ██   ██    ██
+███████    ██    ███████ ██████     ██
+     ██    ██    ██   ██ ██   ██    ██
+███████    ██    ██   ██ ██   ██    ██
+*/
 
 
 //IMPORTANT-Start after document is loaded
