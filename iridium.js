@@ -361,12 +361,6 @@ var iridium=function(customNamespace,startTag,endTag){
    ██    ███████ ██      ██ ██      ███████ ██   ██    ██    ███████ ███████
 */
 
-
-    //------------------------------------------------------------------
-    //    TEMPLATE FUNCTIONS
-    //------------------------------------------------------------------
-
-
     /**
      * Given a expression retrieve value
      * if key=key->current model, value from object
@@ -384,9 +378,9 @@ var iridium=function(customNamespace,startTag,endTag){
             if(index<0){
               //--------CURRENT MODEL----------------
                 //key is a function instead a value.if function() with no params, add 'this' object, for magic features
-                var pos=key.indexOf("(");
+                let pos=key.indexOf("(");
                 if(pos>-1){
-                    if (key.indexOf("()")>-1) key=key.substring(0,pos+1)+"this"+key.substring(pos+1);
+    //                if (key.indexOf("()")>-1) key=key.substring(0,pos+1)+"this"+key.substring(pos+1);
                     return "ir.controller('"+controllerName+"')."+key;
                 }else{
                     return getObjectProperty( key, object);
@@ -409,9 +403,14 @@ var iridium=function(customNamespace,startTag,endTag){
                     var modelName=prefix;
                     if (!modelName) modelName='';
                     subscriptions.put(modelName,controllerName);
-                    //TODO add code when function instead of value
                     try{
-                      return controllers[modelName].model.get(key);
+                      let pos=key.indexOf("(");
+                      if(pos>-1){
+                          //if (key.indexOf("()")>-1) key=key.substring(0,pos+1)+"this"+key.substring(pos+1);
+                          return "ir.controller('"+modelName+"')."+key;
+                      }else{
+                        return controllers[modelName].model.get(key);
+                      }
                     }catch(err){
                       console.error(err);
                       return "ERROR";
@@ -775,12 +774,12 @@ var iridium=function(customNamespace,startTag,endTag){
     //var templates; templates are already in the html files
 
     /*
-███████ ███████ ███████ ███████ ██  ██████  ███    ██
-██      ██      ██      ██      ██ ██    ██ ████   ██
-███████ █████   ███████ ███████ ██ ██    ██ ██ ██  ██
-     ██ ██           ██      ██ ██ ██    ██ ██  ██ ██
-███████ ███████ ███████ ███████ ██  ██████  ██   ████
-*/
+    ███████ ███████ ███████ ███████ ██  ██████  ███    ██
+    ██      ██      ██      ██      ██ ██    ██ ████   ██
+    ███████ █████   ███████ ███████ ██ ██    ██ ██ ██  ██
+         ██ ██           ██      ██ ██ ██    ██ ██  ██ ██
+    ███████ ███████ ███████ ███████ ██  ██████  ██   ████
+    */
 
     //Session is intended to keep data (not in the url) between pages or when refreshing the page. I.e: the user id if the user is logged
     //Session is different than headers & cookies since these ones are sent to the server on each request
