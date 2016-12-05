@@ -231,7 +231,7 @@ var iridium=function(customNamespace,startTag,endTag){
         delete pagesStillLoading[url];
         //(ALREADY LOADED WHEN CONFIGURE ROUTER->READ(either from controller().configure or from data-provider))
         $("["+c.data_model+"]:not(["+c.data_status+"])").each(function( ) {
-            if (this.getAttribute(c.data_provider)) paintToTemplate(this.getAttribute(c.data_model));
+            paintToTemplate(this.getAttribute(c.data_model));
         });
         //after page loaded execute custom function
         if($.isEmptyObject(pagesStillLoading)){
@@ -338,7 +338,7 @@ var iridium=function(customNamespace,startTag,endTag){
             for (var i = 0; i < templates.length; i++) {
                 var template=templates[i];
                 var templateName=template.getAttribute(c.data_model);
-                if (controllers[templateName]) controllers[templateName]._destroy();
+                if (controllers[templateName]) controllers[templateName]._();
             }
         }
         $(selector).empty();
@@ -385,9 +385,10 @@ var iridium=function(customNamespace,startTag,endTag){
                         return queryString(key);
                     }
                 }else{
-                    //extract data from existing model
+                    //extract data from external model
                     var modelName=prefix;
                     if (!modelName) modelName='';
+                    subscriptions.put(modelName,controllerName);
                     //TODO add code when function instead of value
                     try{
                       return controllers[modelName].model.get(key);
@@ -588,7 +589,7 @@ var iridium=function(customNamespace,startTag,endTag){
         function checkDynamicTemplateName(templateName, elTemplate){
             var model=templateName;
             var provider=elTemplate.getAttribute(c.data_provider);
-            if (model.indexOf(tag1)===-1 && provider.indexOf(tag1)===-1) return model;//static template, exit
+            if (model.indexOf(tag1)===-1 && (!provider || provider.indexOf(tag1)===-1)) return model;//static template, exit
             //object. the dynamic template should take a value from his parent template "{{a}}", or explicit template "{{myTemplate:a}"
             var object;
             var jParent=$(elTemplate).parents(cssAttribute(c.data_model));
@@ -625,16 +626,19 @@ var iridium=function(customNamespace,startTag,endTag){
 
         /**
          * If controller definition is in template tag, it must be configured first;
+         * Note: a template may not have a data-provider tag or ir.controller, in that case, create an empty one
          */
         function checkIfControllerIsConfiguredAndReady(templateName,elTemplate){
             var model=templateName;
             var provider=elTemplate.getAttribute(c.data_provider);
             var options=elTemplate.getAttribute(c.data_options);
-            if(!provider){//if not configured in html mode, it must be configured in javascript mode
-                if (!controllers[model]) {
-                    console.warn( "there is no controller for "+templateName+". Check if ["+c.data_provider+"] or ir.controller(name).configure(url) exists");
-                    return false;
-                }else return true;
+            if(!provider){
+              if (controllers[model]){
+                return true;
+              }else{
+                elTemplate.setAttribute(c.data_provider,"{}");//create an empty controller
+                provider=elTemplate.getAttribute(c.data_provider);
+              }
             }
             if(provider && !controllers[model]){
                 var cr=controller(model);
@@ -875,7 +879,31 @@ var iridium=function(customNamespace,startTag,endTag){
         }
     }
 
+    //------------------------------------------------------------------
+    //    subscriptions
+    //------------------------------------------------------------------
+    var subscriptions={
+      obj:{},
+      get:function(topic){
+        return this.obj[topic] || [];
+      },
+      put:function(topic,subscriptor){
+        if (this.obj[topic]===undefined) this.obj[topic]=[];
+         if(this.obj[topic].includes(subscriptor)===false) this.obj[topic].push(subscriptor);
+      },
+      clean:function (name){
+        delete this.obj[name];
+        for (let topic of this.obj){
+          let subscriptors= this.obj[topic];
+          if (subscriptors){
+            for (let i = subscriptors.length-1; i--;){
+              if (subscriptors[i] === name) subscriptors.splice(i, 1);
+            }
+          }
+        }
+      }
 
+    }
 
 
     //------------------------------------------------------------------
@@ -915,6 +943,8 @@ var iridium=function(customNamespace,startTag,endTag){
             if(controller.options.indexOf("autosave")>-1){
               controller.update().then((controller)=>paintToTemplate(controller.name));
             }else paintToTemplate(this.name);
+            //notify also the external objects looking for values in this model
+            for (let subscriptor of subscriptions.get(this.name)) paintToTemplate(subscriptor);
           },
           get length(){
             if (this.obj===undefined || this.obj===null) return -1;
@@ -1200,13 +1230,14 @@ var iridium=function(customNamespace,startTag,endTag){
               return this.read();
             }
         };
-        controller.prototype._destroy=function(){
-            //TODO check if <input> binds are destroyed as well
+        controller.prototype._=function(){
+            //TODO check if <input> binds are ed as well
             delete controllers[this.name];
+            subscriptions.clean(this.name);
         };
         //return function
         if(controllers[name]){
-            return     controllers[name];
+            return controllers[name];
         }else{
             var cr=new controller(name);
             controllers[name]=cr;
@@ -1330,9 +1361,6 @@ var iridium=function(customNamespace,startTag,endTag){
         session:function(){return session;},
 
         security:function(){return _security;},
-
-//        view:function(name){return view(name);}
-//        ,
         router:function(name){return router(name);},
         model:function(name){return controller(name).model;},
         controller:function(name){return controller(name);}
