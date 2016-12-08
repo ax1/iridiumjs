@@ -44,6 +44,7 @@ var iridium=function(customNamespace,startTag,endTag){
      * @param functionName the function name to be executed
      * @param params [OPTIONAL] array of params to be used as input params
      * @param scope [OPTIONAL] The object to search for the function definition.if scope is not set, the global scope is used (window)
+     * @return the value returned from the function call
      */
      //TODO improve this method by:
              // 1-using apply(this,params) instead of apply(null),
@@ -53,7 +54,7 @@ var iridium=function(customNamespace,startTag,endTag){
         if (!params) myParams=[];
         if (!scope) scope=window;
         var fn = scope[functionName];
-        if (typeof fn === "function") fn.apply(null, myParams);
+        if (typeof fn === "function") return fn.apply(scope, myParams);
     }
 
     /**
