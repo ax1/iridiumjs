@@ -665,8 +665,12 @@ var iridium=function(customNamespace,startTag,endTag){
                 cr.configure(provider,null,options);
                 return false;
             }else{
-                if (controllers[model].isReady) return true;
-                else return false;
+                if (controllers[model].isConfigured===false){
+                  controllers[model].configure(provider,undefined,options);
+                  return false;
+                }
+                if (controllers[model].isReady===false) return false;
+                else return true;
             }
         }
 
@@ -940,13 +944,12 @@ var iridium=function(customNamespace,startTag,endTag){
     }
 
     /*
-     ██████  ██████  ███    ██ ████████ ██████   ██████  ██      ██      ███████ ██████  ███████
-    ██      ██    ██ ████   ██    ██    ██   ██ ██    ██ ██      ██      ██      ██   ██ ██
-    ██      ██    ██ ██ ██  ██    ██    ██████  ██    ██ ██      ██      █████   ██████  ███████
-    ██      ██    ██ ██  ██ ██    ██    ██   ██ ██    ██ ██      ██      ██      ██   ██      ██
-     ██████  ██████  ██   ████    ██    ██   ██  ██████  ███████ ███████ ███████ ██   ██ ███████
+    ███    ███  ██████  ██████  ███████ ██      ███████
+    ████  ████ ██    ██ ██   ██ ██      ██      ██
+    ██ ████ ██ ██    ██ ██   ██ █████   ██      ███████
+    ██  ██  ██ ██    ██ ██   ██ ██      ██           ██
+    ██      ██  ██████  ██████  ███████ ███████ ███████
     */
-
 
     var model=function(name,controller){
 
@@ -979,7 +982,7 @@ var iridium=function(customNamespace,startTag,endTag){
             this.execute();
           },
           execute(){
-            if(controller.options.indexOf("autosave")>-1){
+            if(controller.options && controller.options.indexOf("autosave")>-1){
               controller.update().then((controller)=>paintToTemplate(controller.name));
             }else paintToTemplate(this.name);
             //notify also the external objects looking for values in this model
@@ -993,6 +996,14 @@ var iridium=function(customNamespace,startTag,endTag){
         return model;
     };
 
+    /*
+     ██████  ██████  ███    ██ ████████ ██████   ██████  ██      ██      ███████ ██████  ███████
+    ██      ██    ██ ████   ██    ██    ██   ██ ██    ██ ██      ██      ██      ██   ██ ██
+    ██      ██    ██ ██ ██  ██    ██    ██████  ██    ██ ██      ██      █████   ██████  ███████
+    ██      ██    ██ ██  ██ ██    ██    ██   ██ ██    ██ ██      ██      ██      ██   ██      ██
+     ██████  ██████  ██   ████    ██    ██   ██  ██████  ███████ ███████ ███████ ██   ██ ███████
+    */
+
     var controller=function(name){
 
         function controller(name){
@@ -1000,8 +1011,9 @@ var iridium=function(customNamespace,startTag,endTag){
             this.url=undefined;
             this.model=model(name,this);
             this.template=cssAttribute(c.data_model,this.name);
-            this.isReady=false;
-            this.options=undefined;
+            this.isConfigured=false;//when configure() has been called,it will set isReady when read() is retrieved. A controller can exists but not configure when for instance, new methods are added before configuring
+            this.isReady=false;//when configure() and read() has been called, therefore we can paint  data to template
+            this.options="";
             this.customMethods={};
         }
 
@@ -1262,6 +1274,7 @@ var iridium=function(customNamespace,startTag,endTag){
             this.options=options;
             if(customMethods) this.customMethods=customMethods;
             if(options) this.options=options; else this.options='';
+            this.isConfigured=true;
             if (this.options.indexOf("autorefresh")>-1){
               this.read();//call first direct to avoid delay
               setInterval(()=>this.read(),1000);
