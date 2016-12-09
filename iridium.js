@@ -249,6 +249,38 @@ var iridium=function(customNamespace,startTag,endTag){
 
     }
 
+    function setExternalSubscriptions(elTemplate){
+      let templateName=elTemplate.getAttribute(c.data_model)
+      //"data-model={{name:function(aa.bbb)}}--{{localstorage:release()}} will find the first{{}} and 0the second{{}} as well
+      let regex=/{{\w*:\w*\(?\w*\)?}}/ig
+      //"div class='' data-value="
+      let text=elTemplate.outerHTML
+      var myArray;
+      //{{model:val}} found
+      while ((myArray = regex.exec(text)) !== null) {
+        let result=myArray[0]
+        let index=myArray.index;
+        //result=result.substring(tag1.length,result.length-tag2.length)
+        let offset=0
+        if (index>=20) offset=index-20
+        let part=text.substring(offset,index)
+        let regex2=/[ ]data-[a-z]*=/ig
+        let res=regex2.exec(part)
+        //get attribute name
+        if(res){
+          let attribute=res[0].replace('=','').trim()
+          let elements=document.querySelectorAll(cssAttribute(c.data_model,templateName) +' '+cssAttribute(attribute,result))
+          let topic=result.replace('{{','').trim()
+          topic=topic.substring(0,topic.indexOf(':')).trim()
+          //get dom element and add to subscriptions
+          for (let r=0;r<elements.length;r++){
+            let el=elements[r]
+            subscriptions.put(topic,{element:el,attribute:attribute,template:templateName})
+          }
+        }
+      }
+    }
+
     /**
      * Load all child pages inside the containers. Any container must have the data-load property containing the url to be loaded.
      */
@@ -396,7 +428,6 @@ var iridium=function(customNamespace,startTag,endTag){
                     //extract data from external model
                     var modelName=prefix;
                     if (!modelName) modelName='';
-                    subscriptions.put(modelName,controllerName);
                     try{
                       return executeFunctionOrVariable(modelName,key,containerName);
                     }catch(err){
@@ -709,6 +740,7 @@ var iridium=function(customNamespace,startTag,endTag){
             paintNodes(templateName,elTemplate,jTemplate,object);
             //if template was not inited yet->all processed->mark as inited
             if(!jTemplate.attr(c.data_status)){
+                setExternalSubscriptions(elTemplate);
                 jTemplate.attr(c.data_status,"inited");
             }
         }
@@ -917,28 +949,52 @@ var iridium=function(customNamespace,startTag,endTag){
     ███████  ██████  ██████  ███████  ██████ ██   ██ ██ ██         ██    ██  ██████  ██   ████ ███████
     */
 
-//TODO enhance sbscriptor list instead of paittotemplate, since A>b>C ana A is a fake template requesting C:variable, it will repainnt A B and C 
+//TODO enhance sbscriptor list instead of painttotemplate, since A>b>C ana A is a fake template requesting C:variable, it will repainnt A B and C
     var subscriptions={
       obj:{},
       get:function(topic){
-        return this.obj[topic] || [];
+        return this.obj[topic] || []
       },
       put:function(topic,subscriptor){
-        if (this.obj[topic]===undefined) this.obj[topic]=[];
-         if(this.obj[topic].includes(subscriptor)===false) this.obj[topic].push(subscriptor);
+        if (!Array.isArray(this.obj[topic])) this.obj[topic]=[]
+        let subscriptors=this.obj[topic]
+        //purge obsolete elements
+        for(let r=0;r<subscriptors.length;r++){
+          if(!subscriptors[r] && !subscriptors[r].element) {
+            subscriptors.splice(r,1)
+            r=0
+          }
+        }
+        //add element
+         if(!subscriptors.includes(subscriptor)) subscriptors.push(subscriptor);
       },
       clean:function (name){
         delete this.obj[name];
-        for (let topic of this.obj){
-          let subscriptors= this.obj[topic];
-          if (subscriptors){
-            for (let i = subscriptors.length-1; i--;){
-              if (subscriptors[i] === name) subscriptors.splice(i, 1);
-            }
-          }
+      },
+      updateSubscriptor:function(subscriptor){
+        var el=subscriptor.element
+        if(!el) return
+        var attrName=subscriptor.attribute
+        if(attrName!==c.data_value && attrName.startsWith(c.data_)) return
+        let attrValue=subscriptor.element.getAttribute(attrName)
+        if(!attrValue) return
+        if (attrValue.indexOf(tag1)===-1) return
+
+        let expression=attrValue;
+        let res
+        while(expression.indexOf(tag1)>-1){
+          res=lookupExpression(subscriptor.template,expression,ir.model('subscriptor').obj,attrName)
+          expression=sanitizeText(el,res.newText)
+        }
+        if (attrName===c.data_value){
+          el.textContent=expression
+        }else{
+          var realAttrName=attrName.substring(c.data_.length)
+          el.setAttribute(realAttrName,expression)
         }
       }
     }
+
 
     /*
     ███    ███  ██████  ██████  ███████ ██      ███████
@@ -983,7 +1039,8 @@ var iridium=function(customNamespace,startTag,endTag){
               controller.update().then((controller)=>paintToTemplate(controller.name));
             }else paintToTemplate(this.name);
             //notify also the external objects looking for values in this model
-            for (let subscriptor of subscriptions.get(this.name)) paintToTemplate(subscriptor);
+            //function paintNodes(templateName,el,jEl,object)
+            for (let subscriptor of subscriptions.get(this.name)) subscriptions.updateSubscriptor(subscriptor);
           },
           get length(){
             if (this.obj===undefined || this.obj===null) return -1;
