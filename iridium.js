@@ -370,22 +370,15 @@ var iridium=function(customNamespace,startTag,endTag){
      * if key=$queryString-> retrieve the full querystring
      * if key=$queryString:key-> retrieve the querystring key
      */
-    function processExpression(controllerName,key,object){
+    function processExpression(controllerName,key,object,containerName){
 
-        function process(controllerName,key,object){
+        function process(controllerName,key){
             //querystring is special, it can contain no keys
             if(key==="$queryString" || key==="$querystring") return queryString();
             var index=key.indexOf(":");
             if(index<0){
               //--------CURRENT MODEL----------------
-                //key is a function instead a value.if function() with no params, add 'this' object, for magic features
-                let pos=key.indexOf("(");
-                if(pos>-1){
-    //                if (key.indexOf("()")>-1) key=key.substring(0,pos+1)+"this"+key.substring(pos+1);
-                    return "ir.controller('"+controllerName+"')."+key;
-                }else{
-                    return getObjectProperty( key, object);
-                }
+              return executeFunctionOrVariable(controllerName,key,containerName);
             }else{
               //---------EXTERNAL MODEL--------------
                 var prefix=key.substring(0,index);
@@ -405,13 +398,7 @@ var iridium=function(customNamespace,startTag,endTag){
                     if (!modelName) modelName='';
                     subscriptions.put(modelName,controllerName);
                     try{
-                      let pos=key.indexOf("(");
-                      if(pos>-1){
-                          //if (key.indexOf("()")>-1) key=key.substring(0,pos+1)+"this"+key.substring(pos+1);
-                          return "ir.controller('"+modelName+"')."+key;
-                      }else{
-                        return controllers[modelName].model.get(key);
-                      }
+                      return executeFunctionOrVariable(modelName,key,containerName);
                     }catch(err){
                       console.error(err);
                       return "ERROR";
@@ -420,6 +407,17 @@ var iridium=function(customNamespace,startTag,endTag){
             }
         }
 
+    function executeFunctionOrVariable(controllerName,key,containerName){
+      let index=key.indexOf('()');
+      if (!containerName)containerName="";
+      if (index===-1  || (containerName.indexOf(c.data_)>-1 && containerName.indexOf(c.data_value)===-1)|| containerName.startsWith('on')){
+        return controllers[controllerName].model.get(key);
+      }else{
+        let functionName=key.substring(0,index).trim();
+        return run(functionName,[],ir.controller(controllerName));
+      }
+    }
+
         return sanitize(process(controllerName,key,object));
     }
 
@@ -427,7 +425,7 @@ var iridium=function(customNamespace,startTag,endTag){
      * Search for {{keys}} and replace brackets by real object values
      * @returns object with old and new text, undefined if name hasn't got any {{}} inside
      */
-    function lookupExpression(controllerName,text,object){
+    function lookupExpression(controllerName,text,object,containerName){
         if(!text) return undefined;
         var found=false;
         var index1=text.indexOf(tag1);
@@ -436,7 +434,7 @@ var iridium=function(customNamespace,startTag,endTag){
             found=true;
             index2=text.indexOf(tag2);
             var key=text.substring(index1+tag1.length,index2);
-            var value=processExpression(controllerName,key,object);
+            var value=processExpression(controllerName,key,object,containerName);
             if(value===undefined || value===null) value="";
             var newText;
             if (typeof value==='object'){
@@ -487,8 +485,6 @@ var iridium=function(customNamespace,startTag,endTag){
      * Paint model data to html tags
      */
     var paintToTemplate=function(templateName){
-
-
         /**
          * parse {{}} in attributes
          */
@@ -503,7 +499,7 @@ var iridium=function(customNamespace,startTag,endTag){
                 var expression=attr.value;
                 var res;
                 while(expression.indexOf(tag1)>-1){
-                    res=lookupExpression(templateName,expression,object);
+                    res=lookupExpression(templateName,expression,object,attr.name);
                     expression=sanitizeText(el,res.newText);
                 }
                 //add to real html attribute the processed value
@@ -569,11 +565,11 @@ var iridium=function(customNamespace,startTag,endTag){
             var node=nodes[r];
             if (node.nodeType==3){//IF TEXT
               if (node.data.indexOf(tag1)===-1) continue;
-              var res=lookupExpression(templateName,node.data,object);
+              var res=lookupExpression(templateName,node.data,object,null);
               //if {{}} create the <span> nodes
               if(res && res.found){
                 var node1=document.createTextNode(res.oldText.substring(0,res.index1));
-                var node2=document.createElement("span");node2.setAttribute("data-value",tag1+res.expression+tag2);node2.data=res.value;
+                var node2=document.createElement("span");node2.setAttribute(c.data_value,tag1+res.expression+tag2);node2.textContent=res.value;
                 var node3=document.createTextNode(res.oldText.substring(res.index2));
                 node.parentNode.insertBefore(node1,node);node.parentNode.insertBefore(node2,node);node.parentNode.insertBefore(node3,node);
                 node.parentNode.removeChild(node);
@@ -618,7 +614,7 @@ var iridium=function(customNamespace,startTag,endTag){
                 object=controllers[parentTemplateName].model.obj;
             }
             //check-data-model
-            var res1=lookupExpression(templateName, model, object);
+            var res1=lookupExpression(templateName, model, object,c.data_model);
             if (res1){
                 var newTemplateName=res1.newText;
                 var attr=cssAttribute(c.data_model,newTemplateName);
@@ -627,7 +623,7 @@ var iridium=function(customNamespace,startTag,endTag){
                 model=res1.newText;
             }
             //check data-provider
-            var res2=lookupExpression(model, provider, object);
+            var res2=lookupExpression(model, provider, object,c.data_provider);
             if (res2) {
                 provider=res2.newText;
                 elTemplate.setAttribute(c.data_provider,provider);
@@ -921,7 +917,7 @@ var iridium=function(customNamespace,startTag,endTag){
     ███████  ██████  ██████  ███████  ██████ ██   ██ ██ ██         ██    ██  ██████  ██   ████ ███████
     */
 
-
+//TODO enhance sbscriptor list instead of paittotemplate, since A>b>C ana A is a fake template requesting C:variable, it will repainnt A B and C 
     var subscriptions={
       obj:{},
       get:function(topic){
@@ -1095,7 +1091,7 @@ var iridium=function(customNamespace,startTag,endTag){
                         callCustomOK(objectController,c.read);
                         resolve(objectController);
                     }else{
-                      var processed=lookupExpression(objectController.name,objectController.url,objectController.model.obj);
+                      var processed=lookupExpression(objectController.name,objectController.url,objectController.model.obj,null);
                       if (processed) objectController.url=processed.newText;
                       var url=objectController.url;
                       var storage;
