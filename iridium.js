@@ -188,7 +188,9 @@ var iridium=function(customNamespace,startTag,endTag){
     function getObjectProperty(key, object){
       var obj=getObjectPropertyParent(key, object);
       if (typeof(obj)==='undefined') return undefined;
-      else return obj[key.split('.').pop()]||"";
+      else{
+        return obj[key.split('.').pop()];
+      }
     }
 
     /**
@@ -258,7 +260,8 @@ var iridium=function(customNamespace,startTag,endTag){
      */
     function setExternalSubscriptions(elContainer,templateName){
       //"data-model={{name:function(aa.bbb)}}--{{localstorage:release()}} will find the first{{}} and 0the second{{}} as well
-      let regex=/{{\w*:\w*\(?\w*\)?}}/ig
+      //let regex=/{{\w*:\w*\(?\w*\)?}}/ig fails if {{data-model:variable}} (the - is the offending char)
+      let regex=/{{[^<]*:[^<]*\(?\w*\)?}}/ig
       //"div class='' data-value="
       let text=elContainer.outerHTML
       var myArray;
@@ -410,7 +413,7 @@ var iridium=function(customNamespace,startTag,endTag){
      * if key=$queryString-> retrieve the full querystring
      * if key=$queryString:key-> retrieve the querystring key
      */
-    function processExpression(controllerName,key,object,containerName){
+    function processExpression(controllerName,key,object,attributeName){
 
         function process(controllerName,key){
             //querystring is special, it can contain no keys
@@ -418,7 +421,7 @@ var iridium=function(customNamespace,startTag,endTag){
             var index=key.indexOf(":");
             if(index<0){
               //--------CURRENT MODEL----------------
-              return executeFunctionOrVariable(controllerName,key,containerName);
+              return executeFunctionOrVariable(controllerName,key,attributeName);
             }else{
               //---------EXTERNAL MODEL--------------
                 var prefix=key.substring(0,index);
@@ -437,7 +440,7 @@ var iridium=function(customNamespace,startTag,endTag){
                     var modelName=prefix;
                     if (!modelName) modelName='';
                     try{
-                      return executeFunctionOrVariable(modelName,key,containerName);
+                      return executeFunctionOrVariable(modelName,key,attributeName);
                     }catch(err){
                       console.error(err);
                       return "ERROR";
@@ -446,15 +449,20 @@ var iridium=function(customNamespace,startTag,endTag){
             }
         }
 
-    function executeFunctionOrVariable(controllerName,key,containerName){
-      let index=key.indexOf('()');
-      if (!containerName)containerName="";
-      if (index===-1  || (containerName.indexOf(c.data_)>-1 && containerName.indexOf(c.data_value)===-1)|| containerName.startsWith('on')){
-        return controllers[controllerName].model.get(key);
+    function executeFunctionOrVariable(controllerName,key,attributeName){
+      let index=key.indexOf('(')
+      if (!attributeName)attributeName=''
+      if (index===-1){
+        return controllers[controllerName].model.get(key)
       }else{
         let functionName=key.substring(0,index).trim();
-        return run(functionName,[],ir.controller(controllerName));
+        if(attributeName.startsWith('on')||attributeName.startsWith(c.data_+'on')){
+          return "ir.controller('"+controllerName+"')."+key
+        }else{
+          return run(functionName,[],ir.controller(controllerName));
+        }
       }
+
     }
 
         return sanitize(process(controllerName,key,object));
@@ -464,7 +472,7 @@ var iridium=function(customNamespace,startTag,endTag){
      * Search for {{keys}} and replace brackets by real object values
      * @returns object with old and new text, undefined if name hasn't got any {{}} inside
      */
-    function lookupExpression(controllerName,text,object,containerName){
+    function lookupExpression(controllerName,text,object,attributeName){
         if(!text) return undefined;
         var found=false;
         var index1=text.indexOf(tag1);
@@ -473,7 +481,7 @@ var iridium=function(customNamespace,startTag,endTag){
             found=true;
             index2=text.indexOf(tag2);
             var key=text.substring(index1+tag1.length,index2);
-            var value=processExpression(controllerName,key,object,containerName);
+            var value=processExpression(controllerName,key,object,attributeName);
             if(value===undefined || value===null) value="";
             var newText;
             if (typeof value==='object'){
@@ -1022,7 +1030,11 @@ var iridium=function(customNamespace,startTag,endTag){
             this._obj=newObj
             for (let subscriptor of subscriptions.get(this.name)) subscriptions.updateSubscriptor(subscriptor);
           },
-          get:function(key){return getObjectProperty(key, this.obj);},
+          get:function(key){
+            let value=getObjectProperty(key, this.obj);
+            if(value || value===0) return value;
+            else return "";
+          },
           set:function(key,value){
             //TODO:SECURITY, PREVENT CODE INJECTION
             ///value=encodeURI(value);
@@ -1174,7 +1186,7 @@ var iridium=function(customNamespace,startTag,endTag){
                         let key=url.substring(url.indexOf('/')+1);
                         let objectType;
                         //if model is plural, it should be array
-                        if (key.length>1 && key.substring(key.length-1).toLowerCase()==='s') objectType="[]"; else objectType="{}";
+                        if (objectController.name.substring(key.length-1).toLowerCase()==='s') objectType="[]"; else objectType="{}";
                         let value=storage.getItem(key);
                         if (!value){
                           value=objectType;
