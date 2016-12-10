@@ -228,48 +228,57 @@ var iridium=function(customNamespace,startTag,endTag){
      * Execute some generic code after the view was loaded.
      * Note: use functionDone for custom functions.
      */
-    function checkAndExecuteFunctionAfterViewsLoaded(url){
-        delete pagesStillLoading[url];
+    function checkAndExecuteFunctionAfterViewsLoaded(url,selector){
+        delete pagesStillLoading[url]
+        //pre-process external subscriptors.
+        if(!selector) selector="body"
         //(ALREADY LOADED WHEN CONFIGURE ROUTER->READ(either from controller().configure or from data-provider))
         $("["+c.data_model+"]:not(["+c.data_status+"])").each(function( ) {
-            paintToTemplate(this.getAttribute(c.data_model));
+            paintToTemplate(this.getAttribute(c.data_model))
         });
         //after page loaded execute custom function
         if($.isEmptyObject(pagesStillLoading)){
             if(funcToCallAfterViewLoaded){
                 if (typeof funcToCallAfterViewLoaded==='function'){
-                    funcToCallAfterViewLoaded();
+                    funcToCallAfterViewLoaded()
                 }else if (typeof funcToCallAfterViewLoaded==='string'){
-                    run(funcToCallAfterViewLoaded);
+                    run(funcToCallAfterViewLoaded)
                 }else{
-                    console.error(funcToCallAfterViewLoaded +"is not a function or an String. It cannot be executed (related to '"+url+"')");
+                    console.error(funcToCallAfterViewLoaded +"is not a function or an String. It cannot be executed (related to '"+url+"')")
                 }
             }
         }
-
     }
 
-    function setExternalSubscriptions(elTemplate){
-      let templateName=elTemplate.getAttribute(c.data_model)
+    /**
+     * Parse non-inner model expressions {{modelA:variableName}}
+     * These "external"  elements are not processed when modelA changes, so a subscription is created to update them properly
+     * @param {HTMLElement} elContainer - The element to look for expressions into
+     * @param {string} templateName - The name of the template hosting the expressions, or undefined-null if the container is not a template
+     */
+    function setExternalSubscriptions(elContainer,templateName){
       //"data-model={{name:function(aa.bbb)}}--{{localstorage:release()}} will find the first{{}} and 0the second{{}} as well
       let regex=/{{\w*:\w*\(?\w*\)?}}/ig
       //"div class='' data-value="
-      let text=elTemplate.outerHTML
+      let text=elContainer.outerHTML
       var myArray;
       //{{model:val}} found
       while ((myArray = regex.exec(text)) !== null) {
         let result=myArray[0]
         let index=myArray.index;
-        //result=result.substring(tag1.length,result.length-tag2.length)
         let offset=0
         if (index>=20) offset=index-20
         let part=text.substring(offset,index)
         let regex2=/[ ]data-[a-z]*=/ig
         let res=regex2.exec(part)
+        if(!res){
+          //check if text content and warn to use data-value (since the element cannot be calculated)
+          //TODO this is not easy, so in the meantime, all the {{}} must be inserted into a data-model
+        }
         //get attribute name
         if(res){
           let attribute=res[0].replace('=','').trim()
-          let elements=document.querySelectorAll(cssAttribute(c.data_model,templateName) +' '+cssAttribute(attribute,result))
+          let elements=elContainer.querySelectorAll(cssAttribute(attribute,result))
           let topic=result.replace('{{','').trim()
           topic=topic.substring(0,topic.indexOf(':')).trim()
           //get dom element and add to subscriptions
@@ -281,6 +290,14 @@ var iridium=function(customNamespace,startTag,endTag){
       }
     }
 
+    /*
+    ██       ██████   █████  ██████
+    ██      ██    ██ ██   ██ ██   ██
+    ██      ██    ██ ███████ ██   ██
+    ██      ██    ██ ██   ██ ██   ██
+    ███████  ██████  ██   ██ ██████
+    */
+
     /**
      * Load all child pages inside the containers. Any container must have the data-load property containing the url to be loaded.
      */
@@ -290,15 +307,6 @@ var iridium=function(customNamespace,startTag,endTag){
           _load(url,cssAttribute(c.data_load,url));
       });
     }
-
-    /*
-    ██       ██████   █████  ██████
-    ██      ██    ██ ██   ██ ██   ██
-    ██      ██    ██ ███████ ██   ██
-    ██      ██    ██ ██   ██ ██   ██
-    ███████  ██████  ██   ██ ██████
-    */
-
 
     /**
      * Load an html/js page (generic method)
@@ -356,14 +364,14 @@ var iridium=function(customNamespace,startTag,endTag){
             console.log('loading '+url);
             if (url==='') {
                 //default container so the content is already loaded, just execute the methods to render templates
-                checkAndExecuteFunctionAfterViewsLoaded(url);
+                checkAndExecuteFunctionAfterViewsLoaded(url,selector);
             }else{
                 //any other selector, download page and then execute methods
                 selector=calculateContainerSelector(url,selector);
                 callback=callback || function(){};
                 var callbacks=function(){
                     callback();
-                    checkAndExecuteFunctionAfterViewsLoaded(url);
+                    checkAndExecuteFunctionAfterViewsLoaded(url,selector);
                 };
                 _unload(selector);//remove existing data & events
                 $(selector).load(url,callbacks);
@@ -740,7 +748,7 @@ var iridium=function(customNamespace,startTag,endTag){
             paintNodes(templateName,elTemplate,jTemplate,object);
             //if template was not inited yet->all processed->mark as inited
             if(!jTemplate.attr(c.data_status)){
-                setExternalSubscriptions(elTemplate);
+                setExternalSubscriptions(elTemplate,templateName);
                 jTemplate.attr(c.data_status,"inited");
             }
         }
@@ -965,8 +973,8 @@ var iridium=function(customNamespace,startTag,endTag){
             r=0
           }
         }
-        //add element
-         if(!subscriptors.includes(subscriptor)) subscriptors.push(subscriptor);
+        //add
+        subscriptors.push(subscriptor)
       },
       clean:function (name){
         delete this.obj[name];
@@ -1008,7 +1016,12 @@ var iridium=function(customNamespace,startTag,endTag){
 
         var model={
           name:name,
-          obj:{} /*obj can be {} or []*/,
+          _obj:{} /*obj can be {} or []*/,
+          get obj(){return this._obj},
+          set obj(newObj){
+            this._obj=newObj
+            for (let subscriptor of subscriptions.get(this.name)) subscriptions.updateSubscriptor(subscriptor);
+          },
           get:function(key){return getObjectProperty(key, this.obj);},
           set:function(key,value){
             //TODO:SECURITY, PREVENT CODE INJECTION
@@ -1433,9 +1446,11 @@ var iridium=function(customNamespace,startTag,endTag){
         start:function(){
             if ($(cssAttribute(c.data_container)).length===0) {console.warn("A tag with attribute "+c.data_container+" should be defined, to provide a default container when a page is loaded");} //if no default container, when refreshing a url with hash, a page is loaded but there is no target to load into.
             addCSS();
+            if (!document.body.hasAttribute(c.data_model)) document.body.setAttribute(c.data_model,"iridium-default")//add template name to allow parsing external expressions {{a:b}}
             createLayerLog();
             loadChildPages();//load pages requested from data-load containers
             processRoute();// load pages requested from the address bar
+
         },
         queryString:function(key){
             return queryString(key);
