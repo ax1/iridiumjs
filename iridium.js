@@ -1,4 +1,4 @@
-if (console) console.info("iridium.js 0.5.2");
+if (console) console.info("iridium.js 0.6.0");
 
 //TODO add prototype to router and view objects (as controller does)
 var $;
@@ -253,8 +253,8 @@ var iridium=function(customNamespace,startTag,endTag){
     }
 
     /**
-     * Parse non-inner model expressions {{modelA:variableName}}
-     * These "external"  elements are not processed when modelA changes, so a subscription is created to update them properly
+     * Parse non-inner model expressions {{modelA:variableName}}.
+     * These "external" elements are not processed when modelA changes, so a subscription is created to update them properly.
      * @param {HTMLElement} elContainer - The element to look for expressions into
      * @param {string} templateName - The name of the template hosting the expressions, or undefined-null if the container is not a template
      */
@@ -511,7 +511,7 @@ var iridium=function(customNamespace,startTag,endTag){
 
     /**
      * prevent hacking
-     * //TODO IMPORTANT: wether you escape or not, the main work on sanitize must be IN THE SERVER SIDE (the client can always be hacked)
+     * //TODO IMPORTANT: whether you escape or not, the main work on sanitize must be IN THE SERVER SIDE (the client can always be hacked)
      */
     function sanitizeText(el,text){
         //if <a>, disable javascript injection via href
@@ -871,28 +871,28 @@ var iridium=function(customNamespace,startTag,endTag){
     */
 
     var router=function(name){
-        if (routers[name]){
-            return routers[name];
-        }else{
-            var routerFunction=function(){};
-            var router={
-                configure:function(func){routerFunction=func;}/*function() or function(params)*/,
-                run:function(querystring){routerFunction(querystring);/*querystring(params) is optional*/},
-                remove:function(){delete routers[name];}
-            };
-            routers[name]=router;
-            return router;
+      if (routers[name]){
+        return routers[name]
+      }else{
+        var routerFunction=function(){}
+        var router={
+          configure:function(func){routerFunction=func}/*function() or function(params)*/,
+          run:function(querystring){routerFunction(querystring)/*querystring(params) is optional*/},//TODO if arrow function in configure, the querystring in run() would be not passed, check if better to remove querystring param or allow a payload(path object) param in function definition
+          remove:function(){delete routers[name]}
         }
-    };
+        routers[name]=router
+        return router
+      }
+    }
 
     var temporaryCustomClick={
         router:undefined,//the router to execute the function, just once
         func:undefined,//a custom function to be executed just ONCE. Different than RouterFunction (executed on every call);
         new:false//detect if the custom function will be called asynchronously
-    };
+    }
 
-    var firstTime=true;//check if page is reloaded from the browser
-    var funcToCallAfterViewLoaded;//buffer object to detect if a function must be called
+    var firstTime=true//check if page is reloaded from the browser
+    var funcToCallAfterViewLoaded//buffer object to detect if a function must be called
 
     /**
      * When location.hash changes, decide which pages should be rendered
@@ -965,7 +965,7 @@ var iridium=function(customNamespace,startTag,endTag){
     ███████  ██████  ██████  ███████  ██████ ██   ██ ██ ██         ██    ██  ██████  ██   ████ ███████
     */
 
-//TODO enhance sbscriptor list instead of painttotemplate, since A>b>C ana A is a fake template requesting C:variable, it will repainnt A B and C
+//TODO enhance sbscriptor list instead of paintToTemplate, since if A>b>C and A is a fake template requesting C:variable, it will repaint A B and C
     var subscriptions={
       obj:{},
       get:function(topic){
