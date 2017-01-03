@@ -392,7 +392,7 @@ var iridium=function(customNamespace,startTag,endTag){
             for (var i = 0; i < templates.length; i++) {
                 var template=templates[i];
                 var templateName=template.getAttribute(c.data_model);
-                if (controllers[templateName]) controllers[templateName]._();
+                if (controllers[templateName]) controllers[templateName]._destroy();
             }
         }
         $(selector).empty();
@@ -1288,9 +1288,10 @@ var iridium=function(customNamespace,startTag,endTag){
           return promise;
         };
         /**
-         *Remove an element from the view. Change model and view BUT not in the server (You must call update() to save changes)
-         *@param {HTMLElement} element. The element that called the function. Any element is accepted, but inside the row you want to remove.
-         *@return {Promise}
+         * NOTE: this method is different than controller.delete()
+         * Remove an element from the view. Change model and view BUT not in the server (You must call update() to save changes)
+         * @param {HTMLElement} element. The element that called the function. Any element is accepted, but inside the row you want to remove.
+         * @return {Promise}
          */
         controller.prototype.remove=function(element){
           let name=this.name;
@@ -1317,7 +1318,7 @@ var iridium=function(customNamespace,startTag,endTag){
                   for (let i = 0; i < rowEl.parentElement.children.length; i++) {
                     let child=rowEl.parentElement.children[i];
                     if (child===rowEl){
-                      model.remove(index);
+                      model.delete(index);
                       break;
                     }
                     index++;
@@ -1341,8 +1342,8 @@ var iridium=function(customNamespace,startTag,endTag){
               return this.read();
             }
         };
-        controller.prototype._=function(){
-            //TODO check if <input> binds are ed as well
+        controller.prototype._destroy=function(){
+            //TODO check if <input> binds are destroyed as well
             delete controllers[this.name];
             subscriptions.clean(this.name);
         };
@@ -1355,6 +1356,12 @@ var iridium=function(customNamespace,startTag,endTag){
             return cr;
         }
     };
+
+    function getRealStorage(url){
+      if (url.startsWith("localStorage/")) return localStorage
+      else if (url.startsWith("sessionStorage/")) return sessionStorage
+      else return null
+    }
 
     /*
     ███████ ███████  ██████ ██    ██ ██████  ██ ████████ ██    ██
