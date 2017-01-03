@@ -1116,12 +1116,7 @@ var iridium=function(customNamespace,startTag,endTag){
                 function(resolve,reject){
                     //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
                     var url=objectController.url;
-                    var storage;
-                    if (url.startsWith("localStorage/")){
-                      storage=localStorage;
-                    } else if (url.startsWith("sessionStorage/")){
-                      storage=sessionStorage;
-                    }
+                    var storage=getRealStorage(url);
                     //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
                     if (storage){
                       let key=url.substring(url.indexOf('/')+1);
@@ -1177,12 +1172,7 @@ var iridium=function(customNamespace,startTag,endTag){
                       var processed=lookupExpression(objectController.name,objectController.url,objectController.model.obj,null);
                       if (processed) objectController.url=processed.newText;
                       var url=objectController.url;
-                      var storage;
-                      if (url.startsWith("localStorage/")){
-                        storage=localStorage;
-                      } else if (url.startsWith("sessionStorage/")){
-                        storage=sessionStorage;
-                      }
+                      var storage=getRealStorage(url);
                       if (storage){
                         let key=url.substring(url.indexOf('/')+1);
                         let objectType;
@@ -1223,12 +1213,7 @@ var iridium=function(customNamespace,startTag,endTag){
             var promise=new Promise(
                 function(resolve,reject){
                   var url=objectController.url;
-                  var storage;
-                  if (url.startsWith("localStorage/")){
-                    storage=localStorage;
-                  } else if (url.startsWith("sessionStorage/")){
-                    storage=sessionStorage;
-                  }
+                  var storage=getRealStorage(url);
                   //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
                   if (storage){
                     let key=url.substring(url.indexOf('/')+1);
@@ -1260,12 +1245,7 @@ var iridium=function(customNamespace,startTag,endTag){
                 function(resolve,reject){
                     //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
                     var url=objectController.url;
-                    var storage;
-                    if (url.startsWith("localStorage/")){
-                      storage=localStorage;
-                    } else if (url.startsWith("sessionStorage/")){
-                      storage=sessionStorage;
-                    }
+                    var storage=getRealStorage(url);
                     //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
                     if (storage){
                       let key=url.substring(url.indexOf('/')+1);
