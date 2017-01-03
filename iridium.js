@@ -1051,7 +1051,7 @@ var iridium=function(customNamespace,startTag,endTag){
             }
             this.execute();
           },
-          remove:function(key){
+          delete:function(key){
             var obj=getObjectPropertyParent(key,this.obj);
             if(Array.isArray(obj)){
               obj.splice( key, 1 );
@@ -1107,7 +1107,6 @@ var iridium=function(customNamespace,startTag,endTag){
             if(objectController.customMethods[method] && objectController.customMethods[method][1]){
                 objectController.customMethods[method][1](objectController);
             }
-
         }
 
         controller.prototype.create=function(){
