@@ -244,7 +244,7 @@ var iridium = function(customNamespace, startTag, endTag) {
     if (!selector) selector = "body"
       //(ALREADY LOADED WHEN CONFIGURE ROUTER->READ(either from controller().configure or from data-provider))
     $("[" + c.data_model + "]:not([" + c.data_status + "])").each(function() {
-        paintToTemplate(this.getAttribute(c.data_model))
+        if(!this.getAttribute(c.data_status)) paintToTemplate(this.getAttribute(c.data_model)) //check status again because a non-inited template can be initialized if it is a child template
       })
       //after page loaded execute custom function
     if ($.isEmptyObject(pagesStillLoading)) {
@@ -651,7 +651,7 @@ var iridium = function(customNamespace, startTag, endTag) {
         for (var s = 0; s < el.children.length; s++) {
           var elChild = el.children[s]
           if (elChild.attributes[c.data_model]) {
-            paintToTemplate(elChild.getAttribute(c.data_model)) //if other template is found, bypass (it will be managed by another controller)
+            paintToTemplate(elChild.getAttribute(c.data_model)) //if another template is found, bypass (it will be managed by another controller)
           } else if (elChild.attributes[c.data_skeleton]) {
             // do not process data-skeleton
           } else {
