@@ -138,7 +138,7 @@ var iridium = function(customNamespace, startTag, endTag) {
       })
       .always(function(data, textStatus, jqXHR_or_Error) {})
       .fail(function(jqXHR, textStatus, errorThrown) {
-        processAjaxFailResponse(jqXHR, textStatus, errorThrown)
+        processAjaxFailResponse(this.url, jqXHR, textStatus, errorThrown)
       })
   }
 
@@ -150,7 +150,7 @@ var iridium = function(customNamespace, startTag, endTag) {
     return ajax(url, method, payload, context, "json")
   }
 
-  function processAjaxFailResponse(jqXHR, textStatus, errorThrown) {
+  function processAjaxFailResponse(url, jqXHR, textStatus, errorThrown) {
     var statusCode = jqXHR.status
     if ((statusCode === 0) && errorThrown === "") {
       statusCode = 503
@@ -159,7 +159,9 @@ var iridium = function(customNamespace, startTag, endTag) {
       ir.security().removeAuthenticated()
       location.href = location.protocol + "//" + location.host + location.pathname
     }
-    showErrorLog(statusCode + " " + errorThrown)
+    const errMsg = statusCode + " " + errorThrown + ' (url: ' + url + ')'
+    console.error(errMsg)
+    showErrorLog(errMsg)
   }
 
   function insertHeaders() {
@@ -225,10 +227,10 @@ var iridium = function(customNamespace, startTag, endTag) {
   }
 
   function createLayerLog() {
-    if ($("#" + c.layerLog).length === 0) {
-      var style = "<style>#" + c.layerLog + "{display:none;position: fixed; width:30%; margin: 0 0 0 -15%;left:50%;background-color:rgba(255,0,0,0.8);text-align:center;z-index:100000;top:0%;font-weight:bold;padding:0.1em;border-radius:3px}</style>"
-      var element = '<div id="' + c.layerLog + '" > </div>'
-      $('body').prepend(style + "\n" + element)
+    if (!document.getElementById("#" + c.layerLog)){
+      const style = "<style>#" + c.layerLog + "{display:none;position: fixed; width:30%; margin: 0 0 0 -15%;left:50%;background-color:rgba(255,0,0,0.8);text-align:center;z-index:100000;top:0%;font-weight:bold;padding:0.1em;border-radius:3px}</style>"
+      const element = '<div id="' + c.layerLog + '" ></div>'
+      document.body.insertAdjacentHTML('afterBegin', style+'\n'+element)
     }
   }
 
@@ -793,6 +795,12 @@ var iridium = function(customNamespace, startTag, endTag) {
       }
       //(el.attributes[c.data_skeleton]) return//if skeleton, do nothing
       if (object instanceof Array && el.hasAttribute(c.data_model)) {
+
+        //TODO if array is for a <select> object, is ok not to have an empty option but we should provide a way to have it (for instance by creating a no-process property)
+        //Example: this select does not have emty option. Workaround: create two options and add the template to the second one (instead of the parent tag)
+        //<select data-model="cars-filters" data-provider='[{"vendor":"bmw","model":"M3"},{"vendor":"audi","model":"A5"}]' onchange="{{filter}}">
+        //  <option value='{{0.vendor}}'>{{0.vendor}}</option>
+        //</select>
         let array = object
           //if template not processed, copy all child nodes into a hidden container
         let elSkeleton = el.querySelector(cssAttribute(c.data_skeleton))
@@ -1440,7 +1448,7 @@ var iridium = function(customNamespace, startTag, endTag) {
   }
   var showErrorLog = function(error) {
     console.error(error)
-    $("#" + c.layerLog).css("background-color", "red").text(error).slideDown().delay(2000).slideUp()
+    $("#" + c.layerLog).css("background-color", "red").text("error").slideDown().delay(2000).slideUp()
   }
   var hideLog = function() {
     var $el = $("#" + c.layerLog)
@@ -1488,10 +1496,9 @@ var iridium = function(customNamespace, startTag, endTag) {
       } //if no default container, when refreshing a url with hash, a page is loaded but there is no target to load into.
       addCSS()
       if (!document.body.hasAttribute(c.data_model)) document.body.setAttribute(c.data_model, "iridium-default") //add template name to allow parsing external expressions {{a:b}}
-      createLayerLog()
+      createLayerLog() //TODO if ir.controller('foo') is called in the root page and error, the log layer is not still created. Therefore IR.CONFIGURE SHOULD CALL AN ASYNC FUNCTION
       loadChildPages() //load pages requested from data-load containers
       processRoute() // load pages requested from the address bar
-
     },
     queryString: function(key) {
       return queryString(key)
@@ -1506,8 +1513,6 @@ var iridium = function(customNamespace, startTag, endTag) {
     ajax: function(url, method, payload) {
       return ajax(url, method, payload)
     },
-
-
     /**
      * Generic ajax call.
      * Usage: ajax(url,method,payload).done(function(){//your function})
@@ -1526,7 +1531,7 @@ var iridium = function(customNamespace, startTag, endTag) {
         })
         .always(function(data, textStatus, jqXHR_or_Error) {})
         .fail(function(jqXHR, textStatus, errorThrown) {
-          processAjaxFailResponse(jqXHR, textStatus, errorThrown)
+          processAjaxFailResponse(this.url, jqXHR, textStatus, errorThrown)
         })
     },
     load: function(url, container, callback) {
