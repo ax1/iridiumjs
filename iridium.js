@@ -488,32 +488,39 @@ var iridium = function(customNamespace, startTag, endTag) {
    */
   function lookupExpression(controllerName, text, object, attributeName) {
     if (!text) return undefined
-    var found = false
-    var index1 = text.indexOf(tag1)
-    var index2 = -1
-    if (index1 > -1) {
-      found = true
-      index2 = text.indexOf(tag2)
-      var key = text.substring(index1 + tag1.length, index2)
-      var value = processExpression(controllerName, key, object, attributeName)
-      if (value === undefined || value === null) value = ""
-      var newText
+    const index1 = text.indexOf(tag1)
+    const index2 = text.indexOf(tag2)
+    if (index1 > -1 && index1 > -1) {
+      const expression = text.substring(index1 + tag1.length, index2).trim()
+      let items = [expression]
+      if (expression.indexOf('|') > -1) {
+        items = expression.split('|').map(el => el.trim())
+      }
+      let value
+      value = processExpression(controllerName, items[0], object, attributeName)
+      for (let r=1;r<items.length;r++) {
+        let fn=items[r]
+        if (fn.indexOf('('>-1)) console.error(' incorrect format of pipe, the function name should not have parenthesis')
+        //fn=fn+'('+value+')'
+        return run(fn, [value], ir.controller(controllerName))
+    }
+      let newText
       if (typeof value === 'object') {
         newText = JSON.stringify(value)
       } else {
         newText = text.substring(0, index1) + value + text.substring(index2 + tag2.length)
       }
+      if (value === undefined || value === null) value = ""
       return {
         oldText: text,
         newText: newText,
-        expression: key,
+        expression: expression,
         value: value,
         index1: index1,
-        index2: index2 + tag2.length,
-        found: found
+        index2: index2 + tag2.length
       }
     } else {
-      return undefined
+      return null
     }
   }
 
@@ -628,7 +635,7 @@ var iridium = function(customNamespace, startTag, endTag) {
           if (node.data.indexOf(tag1) === -1) continue
           var res = lookupExpression(templateName, node.data, object, null)
             //if {{}} create the <span> nodes
-          if (res && res.found) {
+          if (res) {
             var node1 = document.createTextNode(res.oldText.substring(0, res.index1))
             var node2 = document.createElement("span");
             node2.setAttribute(c.data_value, tag1 + res.expression + tag2);
