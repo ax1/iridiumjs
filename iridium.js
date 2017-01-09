@@ -494,13 +494,12 @@ var iridium = function(customNamespace, startTag, endTag) {
       if (expression.indexOf('|') > -1) {
         items = expression.split('|').map(el => el.trim())
       }
-      let value
-      value = processExpression(controllerName, items[0], object, attributeName)
+      let value = processExpression(controllerName, items[0], object, attributeName)
       for (let r=1;r<items.length;r++) {
         let fn=items[r]
-        if (fn.indexOf('('>-1)) console.error(' incorrect format of pipe, the function name should not have parenthesis')
+        if (fn.indexOf('(')>-1) console.error(' incorrect format of pipe, the function name should not have parenthesis')
         //fn=fn+'('+value+')'
-        return run(fn, [value], ir.controller(controllerName))
+        value=run(fn, [value], ir.controller(controllerName))
     }
       let newText
       if (typeof value === 'object') {
