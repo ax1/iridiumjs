@@ -53,12 +53,10 @@ var iridium = function(customNamespace, startTag, endTag) {
   //TODO improve this method by:
   // 1-using apply(this,params) instead of apply(null),
   // 2-check if the scope can be autodetected, or taken from the caller of this function,
-  function run(functionName, params, scope) {
-    var myParams
-    if (!params) myParams = []
+  function run(functionName, params=[], scope) {
     if (!scope) scope = window
     var fn = scope[functionName]
-    if (typeof fn === "function") return fn.apply(scope, myParams)
+    if (typeof fn === "function") return fn.apply(scope, params)
   }
 
   /**
