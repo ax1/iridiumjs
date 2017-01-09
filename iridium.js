@@ -822,7 +822,7 @@ var iridium = function(customNamespace, startTag, endTag) {
         let skeleton = elSkeleton.innerHTML
         let text = ""
         array.forEach(function(item, index, arr) {
-          let newText = skeleton.replace(/\{\{0}}/g, "{{" + index + "}}")
+          let newText = skeleton.replace(/\{\{\s*\d\s*/g, "{{" + index)
           newText = newText.replace(/\{\{0\./g, "{{" + index + ".")
           text = text + newText
         })
