@@ -31,7 +31,9 @@ var iridium = function(customNamespace, startTag, endTag) {
     read: "read",
     update: "update",
     delete: "delete",
-    remove: "remove" //TODO erase remove after delete keyword is checked (ES6)
+    remove: "remove", //TODO erase remove after delete keyword is checked (ES6)
+    autorefresh: "autorefresh",
+    autosave: "autosave"
   }
 
   function cssAttribute(attr, value) {
@@ -1056,7 +1058,6 @@ var iridium = function(customNamespace, startTag, endTag) {
     }
   }
 
-
   /*
   ███    ███  ██████  ██████  ███████ ██      ███████
   ████  ████ ██    ██ ██   ██ ██      ██      ██
@@ -1107,7 +1108,7 @@ var iridium = function(customNamespace, startTag, endTag) {
         this.execute()
       },
       execute() {
-        if (controller.options && controller.options.indexOf("autosave") > -1) {
+        if (controller.options && controller.options.indexOf(c.autosave) > -1) {
           controller.update().then((controller) => paintToTemplate(controller.name))
         } else paintToTemplate(this.name)
           //notify also the external objects looking for values in this model
@@ -1383,7 +1384,7 @@ var iridium = function(customNamespace, startTag, endTag) {
       if (options) this.options = options;
       else this.options = ''
       this.isConfigured = true
-      if (this.options.indexOf("autorefresh") > -1) {
+      if (this.options.indexOf(c.autorefresh) > -1) {
         this.read() //call first direct to avoid delay
         setInterval(() => this.read(), 1000)
       } else {
