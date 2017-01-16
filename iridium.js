@@ -807,7 +807,7 @@ var iridium = function(customNamespace, startTag, endTag) {
         //<select data-model="cars-filters" data-provider='[{"vendor":"bmw","model":"M3"},{"vendor":"audi","model":"A5"}]' onchange="{{filter}}">
         //  <option value='{{0.vendor}}'>{{0.vendor}}</option>
         //</select>
-        let array = object
+        let array = processDataOptions(el,templateName,object)
           //if template not processed, copy all child nodes into a hidden container
         let elSkeleton = el.querySelector(cssAttribute(c.data_skeleton))
         if (!elSkeleton) {
@@ -841,14 +841,31 @@ var iridium = function(customNamespace, startTag, endTag) {
         parseContent(templateName, el, jEl, object)
         parseChildren(templateName, el, jEl, object)
       }
-
     }
 
+    // data-options attribute can contain custom functions for filtering or sorting data
+    function processDataOptions(el,controllerName,object){
+      if (el.hasAttribute(c.data_options)){
+        let arr=[...object]
+        const options=el.getAttribute(c.data_options).split('|')
+        for (let option of options){
+          option=option.trim()
+          if (option!==c.autorefresh || option!==c.autosave){
+            if (!(object instanceof Array)) {
+              console.error('the object must be an array to execute '+option+'()')
+            }else{
+              arr=run(option, [arr], ir.controller(controllerName))
+            }
+          }
+        }
+        return arr
+      }else{
+        return object
+      }
+    }
 
     paintToTemplate(templateName)
-
   }
-
   var headers = {}
   var routers = {}
     //var views={}
