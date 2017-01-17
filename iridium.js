@@ -799,6 +799,8 @@ var iridium = function(customNamespace, startTag, endTag) {
         el = $(el)[0]
         jEl = $(el)
       }
+      //first, parse attributes
+      parseAttributes(templateName, el, jEl, object)
       //(el.attributes[c.data_skeleton]) return//if skeleton, do nothing
       if (object instanceof Array && el.hasAttribute(c.data_model)) {
         let array = processDataOptions(el,templateName,object)
@@ -829,9 +831,9 @@ var iridium = function(customNamespace, startTag, endTag) {
           nodeList[s].setAttribute(c.data_status, "inited")
         }
         //continue with child elements
-        parseChildren(templateName, el, jEl, object)
+        parseChildren(templateName, el, jEl, array)
       } else {
-        parseAttributes(templateName, el, jEl, object)
+        //parseAttributes(templateName, el, jEl, object)
         parseContent(templateName, el, jEl, object)
         parseChildren(templateName, el, jEl, object)
       }
