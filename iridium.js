@@ -1166,7 +1166,9 @@ var iridium = function(customNamespace, startTag, endTag) {
         objectController.customMethods[method][1](objectController)
       }
     }
-
+    controller.prototype.paint = function() {
+      paintToTemplate(this.name)
+    }
     controller.prototype.create = function() {
       var objectController = this
       var promise = new Promise(
