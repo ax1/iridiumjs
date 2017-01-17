@@ -801,12 +801,6 @@ var iridium = function(customNamespace, startTag, endTag) {
       }
       //(el.attributes[c.data_skeleton]) return//if skeleton, do nothing
       if (object instanceof Array && el.hasAttribute(c.data_model)) {
-
-        //TODO if array is for a <select> object, is ok not to have an empty option but we should provide a way to have it (for instance by creating a no-process property)
-        //Example: this select does not have emty option. Workaround: create two options and add the template to the second one (instead of the parent tag)
-        //<select data-model="cars-filters" data-provider='[{"vendor":"bmw","model":"M3"},{"vendor":"audi","model":"A5"}]' onchange="{{filter}}">
-        //  <option value='{{0.vendor}}'>{{0.vendor}}</option>
-        //</select>
         let array = processDataOptions(el,templateName,object)
           //if template not processed, copy all child nodes into a hidden container
         let elSkeleton = el.querySelector(cssAttribute(c.data_skeleton))
