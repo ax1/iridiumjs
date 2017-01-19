@@ -2,8 +2,7 @@ if (console) console.info("iridium.js 0.6.0")
 
 //TODO add prototype to router and view objects (as controller does)
 //TODO ir.load should be an async/await function (and the rest of callbacks) TO BE DONE
-var $
-if (!$) alert('jQuery is required!!!')
+if (!window.$) alert('jQuery is required!!!')
 var iridium = function(customNamespace, startTag, endTag) {
 
   var namespace = "iridium"
