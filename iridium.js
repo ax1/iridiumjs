@@ -802,7 +802,8 @@ var iridium = function(customNamespace, startTag, endTag) {
       parseAttributes(templateName, el, jEl, object)
       //(el.attributes[c.data_skeleton]) return//if skeleton, do nothing
       if (object instanceof Array && el.hasAttribute(c.data_model)) {
-        let array = processDataOptions(el,templateName,object)
+        let array = object
+        let pos = processDataOptions(el,templateName,object)
           //if template not processed, copy all child nodes into a hidden container
         let elSkeleton = el.querySelector(cssAttribute(c.data_skeleton))
         if (!elSkeleton) {
@@ -810,17 +811,15 @@ var iridium = function(customNamespace, startTag, endTag) {
           elSkeleton = document.createElement("div")
           elSkeleton.style.display = "none"
           elSkeleton.setAttribute(c.data_skeleton, "")
-          while (el.children.length > 0) {
-            elSkeleton.appendChild(el.children[0])
-          }
+          while (el.children.length > 0) {elSkeleton.appendChild(el.children[0])}
           el.appendChild(elSkeleton)
         }
         //create the list elements
         let skeleton = elSkeleton.innerHTML
         let text = ""
-        array.forEach(function(item, index, arr) {
-          let newText = skeleton.replace(/\{\{\s*\d\s*/g, "{{" + index)
-          newText = newText.replace(/\{\{0\./g, "{{" + index + ".")
+        pos.forEach(r=>{
+          let newText = skeleton.replace(/\{\{\s*\d\s*/g, "{{" + r)
+          newText = newText.replace(/\{\{0\./g, "{{" + r + ".")
           text = text + newText
         })
         el.innerHTML = text + elSkeleton.outerHTML
@@ -839,24 +838,25 @@ var iridium = function(customNamespace, startTag, endTag) {
     }
 
     // data-options attribute can contain custom functions for filtering or sorting data
+    // return: array of positions
     function processDataOptions(el,controllerName,object){
+      let arr=[...object]
+      let pos=arr.map((el,i)=>i)
       if (el.hasAttribute(c.data_options)){
-        let arr=[...object]
         const options=el.getAttribute(c.data_options).split('|')
         for (let option of options){
           option=option.trim()
-          if (option!==c.autorefresh || option!==c.autosave){
+          if (option!==c.autorefresh && option!==c.autosave){
             if (!(object instanceof Array)) {
               console.error('the object must be an array to execute '+option+'()')
             }else{
               arr=run(option, [arr], ir.controller(controllerName))
+              pos=arr.map(el=>object.findIndex(item=>item===el))
             }
           }
         }
-        return arr
-      }else{
-        return object
       }
+      return pos
     }
 
     paintToTemplate(templateName)
