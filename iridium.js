@@ -804,30 +804,39 @@ var iridium = function(customNamespace, startTag, endTag) {
       if (object instanceof Array && el.hasAttribute(c.data_model)) {
         let array = object
         let pos = processDataOptions(el,templateName,object)
-          //if template not processed, copy all child nodes into a hidden container
+        //if template not processed, copy all child nodes into a hidden container
         let elSkeleton = el.querySelector(cssAttribute(c.data_skeleton))
         if (!elSkeleton) {
-          //create skeleton
-          elSkeleton = document.createElement("div")
-          elSkeleton.style.display = "none"
-          elSkeleton.setAttribute(c.data_skeleton, "")
-          while (el.children.length > 0) {elSkeleton.appendChild(el.children[0])}
-          el.appendChild(elSkeleton)
+          if (el.tagName.toLowerCase()==='select'){//select cannot have child tags other than <option>, so skeleton must be added as property
+            if (!el.hasAttribute(c.data_skeleton)) el.setAttribute(c.data_skeleton,el.innerHTML)
+          }else{
+            elSkeleton = document.createElement("div")
+            elSkeleton.style.display = "none"
+            elSkeleton.setAttribute(c.data_skeleton, "")
+            while (el.children.length > 0) {elSkeleton.appendChild(el.children[0])}
+            el.appendChild(elSkeleton)
+          }
         }
         //create the list elements
-        let skeleton = elSkeleton.innerHTML
+        let skeleton
+        if (el.hasAttribute(c.data_skeleton)){
+          skeleton = el.getAttribute(c.data_skeleton)
+        }else{
+          skeleton=elSkeleton.innerHTML
+        }
         let text = ""
         pos.forEach(r=>{
           let newText = skeleton.replace(/\{\{\s*\d\s*/g, "{{" + r)
           newText = newText.replace(/\{\{0\./g, "{{" + r + ".")
           text = text + newText
         })
-        el.innerHTML = text + elSkeleton.outerHTML
-          //if skeleton then bypass
-        let nodeList = elSkeleton.querySelectorAll(cssAttribute(c.data_model))
-        for (let s = 0; s < nodeList.length; s++) {
-          nodeList[s].setAttribute(c.data_status, "inited")
+        el.innerHTML = text
+        if (!el.hasAttribute(c.data_skeleton)){ //if tag!=<select> the skeleton is created
+          let childModels = elSkeleton.querySelectorAll(cssAttribute(c.data_model)) //if skeleton then bypass these data-models
+          for (let s = 0; s < childModels.length; s++) {childModels[s].setAttribute(c.data_status, "inited")}
+          el.innerHTML = el.innerHTML+ elSkeleton.outerHTML
         }
+
         //continue with child elements
         parseChildren(templateName, el, jEl, array)
       } else {
