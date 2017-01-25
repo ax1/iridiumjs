@@ -1,4 +1,4 @@
-if (console) console.info("iridium.js 0.6.0")
+if (console) console.info("iridium.js 0.6.1")
 
 //TODO add prototype to router and view objects (as controller does)
 //TODO ir.load should be an async/await function (and the rest of callbacks) TO BE DONE
@@ -237,14 +237,11 @@ var iridium = function(customNamespace, startTag, endTag) {
    */
   function checkAndExecuteFunctionAfterViewsLoaded(url, selector) {
     delete pagesStillLoading[url]
-      //pre-process external subscriptors.
+    //pre-process external subscriptors.
     if (!selector) selector = "body"
-      //(ALREADY LOADED WHEN CONFIGURE ROUTER->READ(either from controller().configure or from data-provider))
-    $("[" + c.data_model + "]:not([" + c.data_status + "])").each(function() {
-        if(!this.getAttribute(c.data_status)) paintToTemplate(this.getAttribute(c.data_model)) //check status again because a non-inited template can be initialized if it is a child template
-      })
-      //after page loaded execute custom function
-    if ($.isEmptyObject(pagesStillLoading)) {
+    initilizePendingTemplates()
+    //after page loaded execute custom function
+    if (pagesStillLoading.length===0) {
       if (funcToCallAfterViewLoaded) {
         if (typeof funcToCallAfterViewLoaded === 'function') {
           funcToCallAfterViewLoaded()
@@ -255,6 +252,18 @@ var iridium = function(customNamespace, startTag, endTag) {
         }
       }
     }
+  }
+
+  function initilizePendingTemplates(){
+    const processedTemplates=[]
+    const templates=document.querySelectorAll("[" + c.data_model + "]:not([" + c.data_status + "])")
+    for (let r = 0; r < templates.length; r++) {
+      if(!templates[r].getAttribute(c.data_status)) {
+        paintToTemplate(templates[r].getAttribute(c.data_model)) //check status again because a non-inited template can be initialized if it is a child template
+        processedTemplates.push(templates[r])
+      }
+    }
+    return processedTemplates
   }
 
   /**
@@ -1167,9 +1176,12 @@ var iridium = function(customNamespace, startTag, endTag) {
         objectController.customMethods[method][1](objectController)
       }
     }
+
     controller.prototype.paint = function() {
-      paintToTemplate(this.name)
+      const processedTemplates=initilizePendingTemplates() //since paint can be called without loading page (i.e: when some templates are in the index page), first check that default-template and others are inited
+      if (!processedTemplates.includes(this.name)) paintToTemplate(this.name) //paint
     }
+
     controller.prototype.create = function() {
       var objectController = this
       var promise = new Promise(
