@@ -599,7 +599,6 @@ var iridium = function(customNamespace, startTag, endTag) {
             jEl.text(res.value)
           }
         }
-
       }
 
       function parseALLAttributes(templateName, el, jEl) {
@@ -1107,8 +1106,11 @@ var iridium = function(customNamespace, startTag, endTag) {
       set: function(key, value) {
         //TODO:SECURITY, PREVENT CODE INJECTION
         ///value=encodeURI(value)
-        setObjectProperty(key, value, this.obj)
-        this.execute()
+        const currentVal=getObjectProperty(key,this.obj)
+        if (currentVal && currentVal!==value){
+          setObjectProperty(key, value, this.obj)
+          this.execute()
+        }
       },
       add: function(key, value) {
         var obj = getObjectPropertyParent(key, this.obj)
@@ -1209,7 +1211,6 @@ var iridium = function(customNamespace, startTag, endTag) {
               }
             )
           }
-
         }
       )
       return promise
