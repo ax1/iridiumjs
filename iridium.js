@@ -30,7 +30,6 @@ var iridium = function(customNamespace, startTag, endTag) {
     read: "read",
     update: "update",
     delete: "delete",
-    remove: "remove", //TODO erase remove after delete keyword is checked (ES6)
     autorefresh: "autorefresh",
     autosave: "autosave"
   }
@@ -51,9 +50,6 @@ var iridium = function(customNamespace, startTag, endTag) {
    * @param scope [OPTIONAL] The object to search for the function definition.if scope is not set, the global scope is used (window)
    * @return the value returned from the function call
    */
-  //TODO improve this method by:
-  // 1-using apply(this,params) instead of apply(null),
-  // 2-check if the scope can be autodetected, or taken from the caller of this function,
   function run(functionName, params=[], scope) {
     if (!scope) scope = window
     var fn = scope[functionName]
@@ -794,10 +790,6 @@ var iridium = function(customNamespace, startTag, endTag) {
      * @param el the DOM element to be processed, el can be a dom object or a css selector
      */
     function paintNodes(templateName, el, jEl, object) {
-      if (!(el instanceof HTMLElement)) { //TODO review this if (maybe deprecated)
-        el = $(el)[0]
-        jEl = $(el)
-      }
       //first, parse attributes
       parseAttributes(templateName, el, jEl, object)
       //(el.attributes[c.data_skeleton]) return//if skeleton, do nothing
@@ -1033,7 +1025,6 @@ var iridium = function(customNamespace, startTag, endTag) {
   ███████  ██████  ██████  ███████  ██████ ██   ██ ██ ██         ██    ██  ██████  ██   ████ ███████
   */
 
-  //TODO enhance sbscriptor list instead of paintToTemplate, since if A>b>C and A is a fake template requesting C:variable, it will repaint A B and C
   var subscriptions = {
     obj: {},
     get: function(topic) {
