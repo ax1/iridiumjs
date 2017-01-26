@@ -166,6 +166,10 @@ var iridium = function(customNamespace, startTag, endTag) {
     headers[c.authorization] = keyValue ? keyValue[2] : null
   }
 
+  function logKeyUndefined(key,value){
+    if (value===undefined) console.warn('The property "'+key+'"'+' was not found (or it is undefined)')
+  }
+
   /**
    * Look into an object,and find a deep property, then return the parent object
    * Example: obj={a:1,b:{b1:0,b2:8}} and key=b.b2
@@ -174,11 +178,13 @@ var iridium = function(customNamespace, startTag, endTag) {
   function getObjectPropertyParent(key, object) {
     if (typeof(key) === 'number') key = key.toString()
     var obj = object
+    logKeyUndefined(key,obj)
     try {
       var data = key.split('.')
       if (data.length === 1) return object
       while (data.length > 1) {
         obj = obj[data.shift()]
+        logKeyUndefined(data,obj)
       }
       return obj
     } catch (error) {
@@ -194,6 +200,7 @@ var iridium = function(customNamespace, startTag, endTag) {
    */
   function getObjectProperty(key, object) {
     var obj = getObjectPropertyParent(key, object)
+    logKeyUndefined(key,obj)
     if (typeof(obj) === 'undefined') return undefined
     else {
       return obj[key.split('.').pop()]
@@ -207,6 +214,7 @@ var iridium = function(customNamespace, startTag, endTag) {
    */
   function setObjectProperty(key, value, object) {
     var obj = getObjectPropertyParent(key, object)
+    logKeyUndefined(key,value) //the programmer can set value undefined, but most of the cases this is a typing error (i.e: key=fooo instead of foo)
     obj[key.split('.').pop()] = value
   }
 
