@@ -10,7 +10,7 @@ var iridium = function(customNamespace, startTag, endTag) {
   var tag1 = startTag || "{{"
   var tag2 = endTag || "}}"
 
-  var c = {
+  const c = {
     session: "session",
     layerLog: "layer-log",
     authorization: "Authorization",
@@ -33,6 +33,8 @@ var iridium = function(customNamespace, startTag, endTag) {
     autorefresh: "autorefresh",
     autosave: "autosave"
   }
+
+  const htmlBooleanAttributes=['allowFullscreen','async','autofocus','autoplay','checked','compact','controls','declare','default','defaultChecked','defaultMuted','defaultSelected','defer','disabled','draggable','enabled','formNoValidate','hidden','indeterminate','inert','isMap','itemScope','loop','multiple','muted','noHref','noResize','noShade','noValidate','noWrap','open','pauseOnExit','readOnly','required','reversed','scoped','seamless','selected','sortable','spellcheck','translate','trueSpeed','typeMustMatch','visible']
 
   function cssAttribute(attr, value) {
     if (!value && value !== '') {
@@ -582,15 +584,23 @@ var iridium = function(customNamespace, startTag, endTag) {
           jEl.attr(realAttrName, expression)
         }
         //----------------------------------------------------------
+        //      if special attributes (checked, autofocus,...) add or remove property (these properties have no value, and are taken into account if present)
+        //----------------------------------------------------------
+        if (htmlBooleanAttributes.includes(realAttrName)){
+          if (res.value===true) el.setAttribute(realAttrName,realAttrName)
+          else el.removeAttribute(realAttrName)
+        }
+        //----------------------------------------------------------
         //       if value->insert into nodeText
         //----------------------------------------------------------
         if (attr.name === c.data_value) {
-          if (el.nodeName.toLowerCase() === "input") {
+          if (el.nodeName.toLowerCase() === "input") {// TODO add input attributes properties ej:checked='{{isChecked}}'
             var attrBind = jEl.attr(c.data_bind)
             if (!attrBind) {
               jEl.attr(c.data_bind, res.expression)
               jEl.val(res.newText)
-              jEl.on("input change inputText", function(event) {
+              //jEl.on("input change inputText", function(event) {
+              jEl.on("change input", function(event) {
                 var val = $(this).val()
                 controllers[templateName].model.set($(this).attr("data-bind"), val) //TODO ARF 13-10-15 check if event propagation is suitable (see $.on documentation). And check if it is better performance solution that the current one since every time a new input is created, it should update model , the tag itself, etc. Maybe the curent solution is already the good one.
               })
