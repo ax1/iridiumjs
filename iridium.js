@@ -199,6 +199,7 @@ var iridium = function(customNamespace, startTag, endTag) {
    * @return {any} the value
    */
   function getObjectProperty(key, object) {
+    if (typeof(key) === 'number') key = key.toString()
     var obj = getObjectPropertyParent(key, object)
     logKeyUndefined(key,obj)
     if (typeof(obj) === 'undefined') return undefined
