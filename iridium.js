@@ -1347,7 +1347,8 @@ var iridium = function(customNamespace, startTag, endTag) {
             callCustomOK(objectController, c.delete)
             resolve(objectController)
           } else {
-            ajaxJSON(objectController.url, "delete", undefined, objectController).then(
+            ajaxJSON(objectController.url, "delete", undefined, objectController)
+            .then(
               function(data, textStatus, jqXHR) {
                 showLog("deleted")
                 callCustomOK(objectController, c.delete)
@@ -1359,13 +1360,14 @@ var iridium = function(customNamespace, startTag, endTag) {
               }
             )
           }
-
         }
       )
       return promise
     }
 
-
+    /**
+     * [ONLY FOR ARRAYS] Useful method to add elements to the model. Note that  controller.model.add(k,v) can be used as replacement
+     */
     controller.prototype.add = function(key, value) {
         let controller = this
         let model = this.model
@@ -1381,12 +1383,13 @@ var iridium = function(customNamespace, startTag, endTag) {
         )
         return promise
       }
-      /**
-       * NOTE: this method is different than controller.delete()
-       * Remove an element from the view. Change model and view BUT not in the server (You must call update() to save changes)
-       * @param {HTMLElement} element. The element that called the function. Any element is accepted, but inside the row you want to remove.
-       * @return {Promise}
-       */
+
+    /**
+     * [ONLY FOR ARRAYS] NOTE: this method is different than controller.delete()
+     * Remove an element from the view. Change model and view BUT not in the server (You must call update() to save changes)
+     * @param {HTMLElement} element. The element that called the function. Any element is accepted, but inside the row you want to remove.
+     * @return {Promise}
+     */
     controller.prototype.remove = function(element) {
       let name = this.name
       let controller = this
@@ -1423,6 +1426,7 @@ var iridium = function(customNamespace, startTag, endTag) {
       )
       return promise
     }
+
     controller.prototype.configure = function(urlOrObject, customMethods, options) {
       this.url = urlOrObject
       this.options = options
@@ -1437,12 +1441,16 @@ var iridium = function(customNamespace, startTag, endTag) {
         return this.read()
       }
     }
+
     controller.prototype._destroy = function() {
-        //TODO check if <input> binds are destroyed as well
-        delete controllers[this.name]
-        subscriptions.clean(this.name)
-      }
-      //return function
+      //TODO check if <input> binds are destroyed as well
+      delete controllers[this.name]
+      subscriptions.clean(this.name)
+    }
+
+    //---------------------------------------
+    //        return controller
+    //---------------------------------------
     if (controllers[name]) {
       return controllers[name]
     } else {
