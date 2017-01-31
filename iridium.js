@@ -603,7 +603,7 @@ var iridium = function(customNamespace, startTag, endTag) {
         //       if value->insert into nodeText
         //----------------------------------------------------------
         if (attr.name === c.data_value) {
-          if (el.nodeName.toLowerCase() === "input") {// TODO add input attributes properties ej:checked='{{isChecked}}'
+          if (el.nodeName.toLowerCase() === "input") {
             var attrBind = jEl.attr(c.data_bind)
             if (!attrBind) {
               jEl.attr(c.data_bind, res.expression)
@@ -1128,7 +1128,7 @@ var iridium = function(customNamespace, startTag, endTag) {
         const currentVal=getObjectProperty(key,this.obj)
         if (currentVal && currentVal!==value){
           setObjectProperty(key, value, this.obj)
-          this.execute()
+          controller._fireChanges()
         }
       },
       add: function(key, value) {
@@ -1138,7 +1138,7 @@ var iridium = function(customNamespace, startTag, endTag) {
         } else {
           obj[key] = value
         }
-        this.execute()
+        controller._fireChanges()
       },
       delete: function(key) {
         var obj = getObjectPropertyParent(key, this.obj)
@@ -1147,15 +1147,7 @@ var iridium = function(customNamespace, startTag, endTag) {
         } else {
           delete obj[key]
         }
-        this.execute()
-      },
-      execute() {
-        if (controller.options && controller.options.indexOf(c.autosave) > -1) {
-          controller.update().then((controller) => paintToTemplate(controller.name))
-        } else paintToTemplate(this.name)
-          //notify also the external objects looking for values in this model
-          //function paintNodes(templateName,el,jEl,object)
-        for (let subscriptor of subscriptions.get(this.name)) subscriptions.updateSubscriptor(subscriptor)
+        controller._fireChanges()
       },
       get length() {
         if (this.obj === undefined || this.obj === null) return -1
@@ -1458,6 +1450,20 @@ var iridium = function(customNamespace, startTag, endTag) {
       controllers[name] = cr
       return cr
     }
+  }
+
+  /**
+   * When model data changes, call controller to update views
+   */
+  controller.prototype._fireChanges=function(){
+    const controller=this
+    if (controller.options && controller.options.indexOf("autosave") > -1) {
+      controller.update().then((controller) => paintToTemplate(controller.name))
+    } else {
+      paintToTemplate(this.name)
+    }
+      //notify also the external objects looking for values in this model
+    for (let subscriptor of subscriptions.get(this.name)) subscriptions.updateSubscriptor(subscriptor)
   }
 
   function getRealStorage(url) {
