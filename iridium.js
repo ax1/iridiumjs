@@ -370,27 +370,26 @@ var iridium = function(customNamespace, startTag, endTag) {
   /**
    * Load an html/js page (generic method)
    */
-  function _load(url, selector, callback) {
-    try {
-      pagesStillLoading[url] = true
-      console.log('loading ' + url)
-      if (url === '') {
-        //default container so the content is already loaded, just execute the methods to render templates
-        checkAndExecuteFunctionAfterViewsLoaded(url, selector)
-      } else {
-        //any other selector, download page and then execute methods
-        selector = calculateContainerSelector(url, selector)
-        callback = callback || function() {}
-        var callbacks = function() {
-          callback()
+  function _load(url, selector) {
+    return new Promise(function (resolve,reject){
+      try {
+        pagesStillLoading[url] = true
+        console.log('loading ' + url)
+        if (url === '') {
+          //default container so the content is already loaded, just execute the methods to render templates
           checkAndExecuteFunctionAfterViewsLoaded(url, selector)
+        } else {
+          //any other selector, download page and then execute methods
+          selector = calculateContainerSelector(url, selector)
+          _unload(selector) //remove existing data & events
+          $(selector).load(url, function() {checkAndExecuteFunctionAfterViewsLoaded(url, selector);resolve(selector)})
         }
-        _unload(selector) //remove existing data & events
-        $(selector).load(url, callbacks)
+      } catch (e) {
+        console.error(e)
+        reject(e)
       }
-    } catch (e) {
-      console.error(e)
-    }
+    })
+
   }
 
   function _unload(selector) {
@@ -1624,8 +1623,8 @@ var iridium = function(customNamespace, startTag, endTag) {
           processAjaxFailResponse(this.url, jqXHR, textStatus, errorThrown)
         })
     },
-    load: function(url, container, callback) {
-      _load(url, container, callback)
+    load: function(url, container) {
+      _load(url, container)
     },
     onAvailable: function(variableName, scope, milliseconds, callback) {
       onAvailable(variableName, scope, milliseconds, callback)
