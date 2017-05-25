@@ -250,7 +250,7 @@ var iridium = function(customNamespace, startTag, endTag) {
     delete pagesStillLoading[url]
     //pre-process external subscriptors.
     if (!selector) selector = "body"
-    initilizePendingTemplates()
+    initializePendingTemplates()
     //after page loaded execute custom function
     if (pagesStillLoading.length===0) {
       if (funcToCallAfterViewLoaded) {
@@ -265,7 +265,7 @@ var iridium = function(customNamespace, startTag, endTag) {
     }
   }
 
-  function initilizePendingTemplates(){
+  function initializePendingTemplates(){
     const processedTemplates=[]
     const templates=document.querySelectorAll("[" + c.data_model + "]:not([" + c.data_status + "])")
     for (let r = 0; r < templates.length; r++) {
@@ -342,55 +342,35 @@ var iridium = function(customNamespace, startTag, endTag) {
 
   /**
    * Load an html/js page (generic method)
+   //TODO this is a plain vanilla function to load html. This function is not completed since we need to call execute <script> tags properly. See Jquery html (6012) and append() function
+   */
+  // async function _load2(url,selector){
+  //   try{
+  //     pagesStillLoading[url] = true
+  //     console.log('loading ' + url)
+  //     if (url === '') {
+  //       //default container so the content is already loaded, just execute the methods to render templates
+  //       checkAndExecuteFunctionAfterViewsLoaded(url, selector)
+  //     } else {
+  //       //any other selector, download page and then execute methods
+  //       selector = calculateContainerSelector(url, selector)
+  //       const response=await fetch(url)
+  //       const content=await response.text()
+  //       _unload(selector)
+  //       document.querySelector(selector).innerHTML=content
+  //       checkAndExecuteFunctionAfterViewsLoaded(url, selector)
+  //     }
+  //     return selector
+  //   }catch(e){
+  //     console.error(e)
+  //     throw e
+  //   }
+  // }
+
+  /**
+   * Load an html/js page (generic method)
    */
   function _load(url, selector, callback) {
-
-    /**
-     * calculate the real selector of the container to be loaded
-     * if no valid selector is given, the default selector is taken from the url
-     * Example: url="users/details.php?user=smith", the selector will be css="#details"
-     */
-    function calculateContainerSelector(url, selector) {
-
-      function testDuplicatedContainer(url, selector) {
-        if ($(selector).length > 1) console.warn("Container '" + selector + "' is not unique (it should be most of the cases). The content of page " + url + " will be loaded into the first one")
-      }
-
-      var originalSelector = selector
-      testDuplicatedContainer(url, selector)
-      if ($(selector).length === 0) {
-        //no valid selector, find the best container for the page to be loaded
-        if (selector && selector.trim().startsWith('#') === false) {
-          selector = "#" + selector
-          testDuplicatedContainer(url, selector)
-        }
-        if ($(selector).length === 0) {
-          var addr = url
-          var index = addr.indexOf("?")
-          if (index > -1) addr = addr.substring(0, index)
-          index = addr.lastIndexOf("/")
-          if (index === addr.length - 1) addr = addr.substring(0, index)
-          index = addr.lastIndexOf("/")
-          if (index > -1) addr = addr.substring(index + 1)
-          index = addr.lastIndexOf(".")
-          if (index > -1) addr = addr.substring(0, index)
-          selector = "#" + addr
-          testDuplicatedContainer(url, selector)
-          if ($(selector).length === 0) {
-            testDuplicatedContainer(url, selector)
-            selector = cssAttribute(c.data_container)
-            testDuplicatedContainer(url, selector)
-            if ($(selector).length === 0) {
-              selector = "body"
-              console.error("container for url " + url + " is " + originalSelector + ", but there is no DOM element related to that container, using default(" + selector + ")")
-            }
-          }
-        }
-      }
-      return selector
-    }
-
-
     try {
       pagesStillLoading[url] = true
       console.log('loading ' + url)
@@ -424,6 +404,51 @@ var iridium = function(customNamespace, startTag, endTag) {
       }
     }
     $(selector).empty()
+  }
+
+  /**
+   * calculate the real selector of the container to be loaded
+   * if no valid selector is given, the default selector is taken from the url
+   * Example: url="users/details.php?user=smith", the selector will be css="#details"
+   */
+  function calculateContainerSelector(url, selector) {
+
+    function testDuplicatedContainer(url, selector) {
+      if ($(selector).length > 1) console.warn("Container '" + selector + "' is not unique (it should be most of the cases). The content of page " + url + " will be loaded into the first one")
+    }
+
+    var originalSelector = selector
+    testDuplicatedContainer(url, selector)
+    if ($(selector).length === 0) {
+      //no valid selector, find the best container for the page to be loaded
+      if (selector && selector.trim().startsWith('#') === false) {
+        selector = "#" + selector
+        testDuplicatedContainer(url, selector)
+      }
+      if ($(selector).length === 0) {
+        var addr = url
+        var index = addr.indexOf("?")
+        if (index > -1) addr = addr.substring(0, index)
+        index = addr.lastIndexOf("/")
+        if (index === addr.length - 1) addr = addr.substring(0, index)
+        index = addr.lastIndexOf("/")
+        if (index > -1) addr = addr.substring(index + 1)
+        index = addr.lastIndexOf(".")
+        if (index > -1) addr = addr.substring(0, index)
+        selector = "#" + addr
+        testDuplicatedContainer(url, selector)
+        if ($(selector).length === 0) {
+          testDuplicatedContainer(url, selector)
+          selector = cssAttribute(c.data_container)
+          testDuplicatedContainer(url, selector)
+          if ($(selector).length === 0) {
+            selector = "body"
+            console.error("container for url " + url + " is " + originalSelector + ", but there is no DOM element related to that container, using default(" + selector + ")")
+          }
+        }
+      }
+    }
+    return selector
   }
 
   /*
@@ -1191,7 +1216,7 @@ var iridium = function(customNamespace, startTag, endTag) {
     }
 
     controller.prototype.paint = function() {
-      const processedTemplates=initilizePendingTemplates() //since paint can be called without loading page (i.e: when some templates are in the index page), first check that default-template and others are inited
+      const processedTemplates=initializePendingTemplates() //since paint can be called without loading page (i.e: when some templates are in the index page), first check that default-template and others are inited
       if (!processedTemplates.includes(this.name)) paintToTemplate(this.name) //paint
     }
 
