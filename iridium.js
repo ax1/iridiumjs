@@ -1150,7 +1150,7 @@ var iridium = function(customNamespace, startTag, endTag) {
         //TODO:SECURITY, PREVENT CODE INJECTION
         ///value=encodeURI(value)
         const currentVal=getObjectProperty(key,this.obj)
-        if (currentVal && currentVal!==value){
+        if (currentVal!==value){
           setObjectProperty(key, value, this.obj)
           controller._fireChanges()
         }
@@ -1477,7 +1477,7 @@ var iridium = function(customNamespace, startTag, endTag) {
         //notify also the external objects looking for values in this model
       for (let subscriptor of subscriptions.get(this.name)) subscriptions.updateSubscriptor(subscriptor)
     }
-    
+
     //---------------------------------------
     //        return controller
     //---------------------------------------
