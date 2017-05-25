@@ -1,0 +1,58 @@
+<!--
+---------------------------------------------------------
+compare iridium wih vue2 at https://vuejs.org/v2/guide/
+---------------------------------------------------------
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+		<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="../iridium.js"></script>
+  </head>
+  <body>
+
+    <div data-model="app-1" data-provider='{"message":"Hello Vue.js!"}'>
+      <p>{{message|uppercase|more}}</p>
+    </div>
+
+    <div>
+      <ol data-model="app-4">
+        <li>{{0|uppercase|more}}</li>
+      </ol>
+    </div>
+    <script>
+      ir.controller('app-4').uppercase=function(value){return value.toUpperCase()}
+      ir.controller('app-4').more=function(value){return value+'ttttttt'}
+      ir.controller('app-4').configure([ 'Learn JavaScript', 'Learn Vue', 'Build something awesome' ])
+    </script>
+
+    <div data-model="app-5">
+      <p>{{message}}</p>
+      <button onclick="{{reverseMessage()}}">Reverse Message</button>
+    </div>
+    <script>
+      ir.controller('app-5').configure({ message: 'Hello Vue.js!' })
+      ir.controller('app-5').reverseMessage = function () {
+        const newMessage = this.model.get('message').split('').reverse().join('')
+        this.model.set('message', newMessage)
+      }
+    </script>
+
+    <div data-model="app-6" data-provider='{"message":"Hello Vue.js!"}'>
+      <p>{{message}}</p>
+      <input value="{{message}}"/>
+    </div>
+
+    <div data-model="app-7">
+      <p>{{message}}</p>
+      <button onclick="{{update()}}">update</button>
+      <input value="{{message}}"/>
+    </div>
+    <script>
+      ir.controller('app-7').configure('localStorage/app-7')
+    </script>
+
+  </body>
+</html>

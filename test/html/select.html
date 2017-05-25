@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="../../iridium.js"></script>
+  </head>
+  <body>
+
+    <select data-model="cars-filters" data-provider='[{"vendor":"","model":""},{"vendor":"bmw","model":"M3"},{"vendor":"audi","model":"A5"}]' onchange='{{cars:paint()}}'>
+      <option value='{{0.vendor}}'>{{0.vendor}}</option>
+    </select>
+
+    <div data-model="cars" data-provider='[{"vendor":"bmw","model":"M3"},{"vendor":"audi","model":"A5"}]' data-options='filterByVendor'>
+      <p><a href="#/car-details/{{0.model}}">{{0.vendor}} {{0.model}}</a></p>
+    </div>
+    <script>
+      ir.controller('cars').filterByVendor = function(arr) {
+        const vendor = document.querySelector("select[data-model='cars-filters']").value
+        if (!vendor) return arr
+        else return arr.filter(item=>item.vendor===vendor?true:false)
+      }
+    </script>
+
+  </body>
+</html>

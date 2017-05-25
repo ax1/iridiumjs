@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>sandbox</title>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="../../iridium.js"></script>
+    <script>
+      function checkFooter(controller){
+        if (controller.model.length<=0) document.querySelector('footer').style.display='none';
+      }
+      function add(event){
+        if (event.keyCode===13){
+          var value=event.target.value;
+          if (value==="")return;
+          ir.controller('names').add(0,value).then(()=>{event.target.value='';});
+        }
+      }
+      function addFlag(event){
+        if (event.keyCode===13){
+          var value=event.target.value;
+          if (value==="")return;
+          ir.controller('flags').add(0,value).then((controller)=>{event.target.value=''});//.then(controller=>controller.update())
+        }
+      }
+    </script>
+  </head>
+
+  <body>
+    <div >
+      <div data-model='names' data-provider='["pep","john"]'>
+        <div>my name is {{0}} <button onclick="{{remove(this)}}.then(checkFooter)">remove</button></div>
+      </div>
+      <div><input onkeypress="add(event)" name='new-name' placeholder="new name" autofocus></input></div>
+      <footer style="position:fixed;bottom:0;background-color:blue;left:0;right:0;">
+        <h1> The footer should be hidden when no names </h1>
+      </footer>
+      <p></p>
+      <div data-model='flags' data-provider='localStorage/flags' data-options='autosave'>
+        <div>{{0}}</div>
+      </div>
+      <div>total: {{flags:length}}</div>
+      <div>total2: {{flags:total2()}}</div>
+    </div>
+    <div><input onkeypress="addFlag(event)" name='new-flag' placeholder="new flag" autofocus></input></div>
+
+    <script>
+      ir.controller('flags').total2=function(){
+        let length=this.model.obj.length
+        if (length && length>3) return "joder no te pases con las flags"
+        else return length
+      }
+
+    </script>
+
+  </body>
+
+
+</html>
