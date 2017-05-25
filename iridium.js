@@ -277,51 +277,6 @@ var iridium = function(customNamespace, startTag, endTag) {
     return processedTemplates
   }
 
-  /**
-   * Parse non-inner model expressions {{modelA:variableName}}.
-   * These "external" elements are not processed when modelA changes, so a subscription is created to update them properly.
-   * @param {HTMLElement} elContainer - The element to look for expressions into
-   * @param {string} templateName - The name of the template hosting the expressions, or undefined-null if the container is not a template
-   */
-  function setExternalSubscriptions(elContainer, templateName) {
-    //"data-model={{name:function(aa.bbb)}}--{{localstorage:release()}} will find the first{{}} and 0the second{{}} as well
-    //let regex=/{{\w*:\w*\(?\w*\)?}}/ig fails if {{data-model:variable}} (the - is the offending char)
-    let regex = /{{[^<]*:[^<]*\(?\w*\)?}}/ig
-      //"div class='' data-value="
-    let text = elContainer.outerHTML
-    var myArray
-      //{{model:val}} found
-    while ((myArray = regex.exec(text)) !== null) {
-      let result = myArray[0]
-      let index = myArray.index
-      let offset = 0
-      if (index >= 20) offset = index - 20
-      let part = text.substring(offset, index)
-      let regex2 = /[ ]data-[a-z]*=/ig
-      let res = regex2.exec(part)
-      if (!res) {
-        //check if text content and warn to use data-value (since the element cannot be calculated)
-        //TODO this is not easy, so in the meantime, all the {{}} must be inserted into a data-model
-      }
-      //get attribute name
-      if (res) {
-        let attribute = res[0].replace('=', '').trim()
-        let elements = elContainer.querySelectorAll(cssAttribute(attribute, result))
-        let topic = result.replace('{{', '').trim()
-        topic = topic.substring(0, topic.indexOf(':')).trim()
-          //get dom element and add to subscriptions
-        for (let r = 0; r < elements.length; r++) {
-          let el = elements[r]
-          subscriptions.put(topic, {
-            element: el,
-            attribute: attribute,
-            template: templateName
-          })
-        }
-      }
-    }
-  }
-
   /*
   ██       ██████   █████  ██████
   ██      ██    ██ ██   ██ ██   ██
@@ -826,7 +781,7 @@ var iridium = function(customNamespace, startTag, endTag) {
       paintNodes(templateName, elTemplate, jTemplate, object)
         //if template was not inited yet->all processed->mark as inited
       if (!jTemplate.attr(c.data_status)) {
-        setExternalSubscriptions(elTemplate, templateName)
+        subscriptions.setExternalSubscriptions(elTemplate, templateName)
         jTemplate.attr(c.data_status, "inited")
       }
     }
@@ -1117,6 +1072,50 @@ var iridium = function(customNamespace, startTag, endTag) {
       } else {
         var realAttrName = attrName.substring(c.data_.length)
         el.setAttribute(realAttrName, expression)
+      }
+    },
+    /**
+     * Parse non-inner model expressions {{modelA:variableName}}.
+     * These "external" elements are not processed when modelA changes, so a subscription is created to update them properly.
+     * @param {HTMLElement} elContainer - The element to look for expressions into
+     * @param {string} templateName - The name of the template hosting the expressions, or undefined-null if the container is not a template
+     */
+    setExternalSubscriptions: function(elContainer, templateName) {
+      //"data-model={{name:function(aa.bbb)}}--{{localstorage:release()}} will find the first{{}} and 0the second{{}} as well
+      //let regex=/{{\w*:\w*\(?\w*\)?}}/ig fails if {{data-model:variable}} (the - is the offending char)
+      let regex = /{{[^<]*:[^<]*\(?\w*\)?}}/ig
+        //"div class='' data-value="
+      let text = elContainer.outerHTML
+      var myArray
+        //{{model:val}} found
+      while ((myArray = regex.exec(text)) !== null) {
+        let result = myArray[0]
+        let index = myArray.index
+        let offset = 0
+        if (index >= 20) offset = index - 20
+        let part = text.substring(offset, index)
+        let regex2 = /[ ]data-[a-z]*=/ig
+        let res = regex2.exec(part)
+        if (!res) {
+          //check if text content and warn to use data-value (since the element cannot be calculated)
+          //TODO this is not easy, so in the meantime, all the {{}} must be inserted into a data-model
+        }
+        //get attribute name
+        if (res) {
+          let attribute = res[0].replace('=', '').trim()
+          let elements = elContainer.querySelectorAll(cssAttribute(attribute, result))
+          let topic = result.replace('{{', '').trim()
+          topic = topic.substring(0, topic.indexOf(':')).trim()
+            //get dom element and add to subscriptions
+          for (let r = 0; r < elements.length; r++) {
+            let el = elements[r]
+            subscriptions.put(topic, {
+              element: el,
+              attribute: attribute,
+              template: templateName
+            })
+          }
+        }
       }
     }
   }
@@ -1489,8 +1488,6 @@ var iridium = function(customNamespace, startTag, endTag) {
       return cr
     }
   }
-
-
 
   function getRealStorage(url) {
     if (url.startsWith("localStorage/")) return localStorage
