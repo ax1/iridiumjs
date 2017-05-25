@@ -1464,6 +1464,20 @@ var iridium = function(customNamespace, startTag, endTag) {
       subscriptions.clean(this.name)
     }
 
+    /**
+     * When model data changes, call controller to update views
+     */
+    controller.prototype._fireChanges=function(){
+      const controller=this
+      if (controller.options && controller.options.indexOf("autosave") > -1) {
+        controller.update().then((controller) => paintToTemplate(controller.name))
+      } else {
+        paintToTemplate(this.name)
+      }
+        //notify also the external objects looking for values in this model
+      for (let subscriptor of subscriptions.get(this.name)) subscriptions.updateSubscriptor(subscriptor)
+    }
+    
     //---------------------------------------
     //        return controller
     //---------------------------------------
@@ -1476,19 +1490,7 @@ var iridium = function(customNamespace, startTag, endTag) {
     }
   }
 
-  /**
-   * When model data changes, call controller to update views
-   */
-  controller.prototype._fireChanges=function(){
-    const controller=this
-    if (controller.options && controller.options.indexOf("autosave") > -1) {
-      controller.update().then((controller) => paintToTemplate(controller.name))
-    } else {
-      paintToTemplate(this.name)
-    }
-      //notify also the external objects looking for values in this model
-    for (let subscriptor of subscriptions.get(this.name)) subscriptions.updateSubscriptor(subscriptor)
-  }
+
 
   function getRealStorage(url) {
     if (url.startsWith("localStorage/")) return localStorage
