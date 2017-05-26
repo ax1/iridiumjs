@@ -8,10 +8,10 @@
   </head>
   <body>
 
+    <h3>filter an array</h3>
     <select data-model="cars-filters" data-provider='[{"vendor":"","model":""},{"vendor":"bmw","model":"M3"},{"vendor":"audi","model":"A5"}]' onchange='{{cars:paint()}}'>
       <option value='{{0.vendor}}'>{{0.vendor}}</option>
     </select>
-
     <div data-model="cars" data-provider='[{"vendor":"bmw","model":"M3"},{"vendor":"audi","model":"A5"}]' data-options='filterByVendor'>
       <p><a href="#/car-details/{{0.model}}">{{0.vendor}} {{0.model}}</a></p>
     </div>
@@ -21,6 +21,21 @@
         if (!vendor) return arr
         else return arr.filter(item=>item.vendor===vendor?true:false)
       }
+    </script>
+
+    <h3>adding a default value not provided in the model</h3>
+    <select data-model='cars-filters1' data-provider='' onchange='{{cars:paint()}}'>
+      <option value='{{0.vendor}}'>{{0.vendor}}</option>
+    </select>
+    <script>
+      ir.controller('cars-filters1').configure([{"vendor":"bmw","model":"M3"},{"vendor":"audi","model":"A5"}],{
+        read:[
+          function(){
+            ir.controller('cars-filters1').model._obj.unshift({"vendor":"none","model":""})
+            ir.controller('cars-filters1').repaint()
+          },null
+        ]
+      })
     </script>
 
   </body>
