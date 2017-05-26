@@ -1229,7 +1229,6 @@ var iridium = function(customNamespace, startTag, endTag) {
           if (storage) {
             let key = url.substring(url.indexOf('/') + 1)
             storage.setItem(key, JSON.stringify(objectController.model.obj))
-            showLog("created")
             callCustomOK(objectController, c.create)
             resolve(objectController)
           } else {
@@ -1326,7 +1325,6 @@ var iridium = function(customNamespace, startTag, endTag) {
           if (storage) {
             let key = url.substring(url.indexOf('/') + 1)
             storage.setItem(key, JSON.stringify(objectController.model.obj))
-            showLog("updated")
             callCustomOK(objectController, c.update)
             resolve(objectController)
           } else {
@@ -1358,7 +1356,6 @@ var iridium = function(customNamespace, startTag, endTag) {
           if (storage) {
             let key = url.substring(url.indexOf('/') + 1)
             storage.removeItem(key)
-            showLog("deleted")
             callCustomOK(objectController, c.delete)
             resolve(objectController)
           } else {
