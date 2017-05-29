@@ -1,4 +1,4 @@
-if (console) console.info("iridium.js 0.6.1")
+if (console) console.info("iridium.js 0.7.0")
 
 //TODO add prototype to router and view objects (as controller does)
 //TODO ir.load should be an async/await function (and the rest of callbacks) TO BE DONE
@@ -240,6 +240,10 @@ var iridium = function(customNamespace, startTag, endTag) {
     }
   }
 
+  function toCapitalCase(text){
+    return text.charAt(0).toUpperCase()+text.slice(1)
+  }
+
   var pagesStillLoading = {}
 
   /**
@@ -465,9 +469,9 @@ var iridium = function(customNamespace, startTag, endTag) {
       } else {
         let functionName = key.substring(0, index).trim()
         if (attributeName.startsWith('on') || attributeName.startsWith(c.data_ + 'on')) {
-          return "ir.controller('" + controllerName + "')." + key
+          return "ir.controller('" + controllerName + "')." + ir.controller.realMethodName(key.substring(0,index).trim())
         } else {
-          return run(functionName, [], ir.controller(controllerName))
+          return run(ir.controller.realMethodName(functionName), [], ir.controller(controllerName))
         }
       }
 
@@ -870,11 +874,6 @@ var iridium = function(customNamespace, startTag, endTag) {
   }
   var headers = {}
   var routers = {}
-    //var views={}
-  var controllers = {}
-    //var models; models are already in sessionStorage
-    //var templates; templates are already in the html files
-
   /*
   ███████ ███████ ███████ ███████ ██  ██████  ███    ██
   ██      ██      ██      ██      ██ ██    ██ ████   ██
@@ -1187,6 +1186,7 @@ var iridium = function(customNamespace, startTag, endTag) {
   ██      ██    ██ ██  ██ ██    ██    ██   ██ ██    ██ ██      ██      ██      ██   ██      ██
    ██████  ██████  ██   ████    ██    ██   ██  ██████  ███████ ███████ ███████ ██   ██ ███████
   */
+  const controllers = {}
 
   var controller = function(name) {
 
@@ -1198,19 +1198,12 @@ var iridium = function(customNamespace, startTag, endTag) {
       this.isConfigured = false //when configure() has been called,it will set isReady when read() is retrieved. A controller can exists but not configure when for instance, new methods are added before configuring
       this.isReady = false //when configure() and read() has been called, therefore we can paint  data to template
       this.options = ""
-      this.customMethods = {}
     }
 
-    function callCustomOK(objectController, method) {
-      if (objectController.customMethods[method] && objectController.customMethods[method][0]) {
-        objectController.customMethods[method][0](objectController)
-      }
-    }
-
-    function callCustomERROR(objectController, method) {
-      if (objectController.customMethods[method] && objectController.customMethods[method][1]) {
-        objectController.customMethods[method][1](objectController)
-      }
+    /**If a customRead, update... is available, use it. If not, use default function**/
+    controller.prototype.realMethodName=function(methodName){
+      if(this['custom'+toCapitalCase(methodName)]) return 'custom'+toCapitalCase(methodName)
+      else return methodName
     }
 
     /**
@@ -1245,17 +1238,14 @@ var iridium = function(customNamespace, startTag, endTag) {
           if (storage) {
             let key = url.substring(url.indexOf('/') + 1)
             storage.setItem(key, JSON.stringify(objectController.model.obj))
-            callCustomOK(objectController, c.create)
             resolve(objectController)
           } else {
             ajaxJSON(objectController.url, "post", JSON.stringify(objectController.model.obj), objectController).then(
               function(data, textStatus, jqXHR) {
                 showLog("created")
-                callCustomOK(objectController, c.create)
                 resolve(objectController)
               },
               function(jqXHR, textStatus, errorThrown) {
-                callCustomERROR(objectController, c.create)
                 reject(objectController, errorThrown)
               }
             )
@@ -1288,7 +1278,6 @@ var iridium = function(customNamespace, startTag, endTag) {
             objectController.model.obj = objectController.url
             objectController.isReady = true
             paintToTemplate(objectController.name)
-            callCustomOK(objectController, c.read)
             resolve(objectController)
           } else {
             var processed = lookupExpression(objectController.name, objectController.url, objectController.model.obj, null)
@@ -1309,7 +1298,6 @@ var iridium = function(customNamespace, startTag, endTag) {
               objectController.model.obj = JSON.parse(value)
               objectController.isReady = true
               paintToTemplate(objectController.name)
-              callCustomOK(objectController, c.read)
               resolve(objectController)
             } else {
               var aj = ajaxJSON(url, "get", undefined, objectController)
@@ -1318,11 +1306,9 @@ var iridium = function(customNamespace, startTag, endTag) {
                   objectController.model.obj = data
                   objectController.isReady = true
                   paintToTemplate(objectController.name)
-                  callCustomOK(objectController, c.read)
                   resolve(objectController)
                 },
                 function(jqXHR, textStatus, errorThrown) {
-                  callCustomERROR(objectController, c.read)
                   reject(objectController, errorThrown)
                 })
             }
@@ -1341,17 +1327,14 @@ var iridium = function(customNamespace, startTag, endTag) {
           if (storage) {
             let key = url.substring(url.indexOf('/') + 1)
             storage.setItem(key, JSON.stringify(objectController.model.obj))
-            callCustomOK(objectController, c.update)
             resolve(objectController)
           } else {
             ajaxJSON(objectController.url, "put", JSON.stringify(objectController.model.obj), objectController).then(
               function(data, textStatus, jqXHR) {
                 showLog("updated")
-                callCustomOK(objectController, c.update)
                 resolve(objectController)
               },
               function(jqXHR, textStatus, errorThrown) {
-                callCustomERROR(objectController, c.update)
                 reject(objectController, errorThrown)
               }
             )
@@ -1372,18 +1355,15 @@ var iridium = function(customNamespace, startTag, endTag) {
           if (storage) {
             let key = url.substring(url.indexOf('/') + 1)
             storage.removeItem(key)
-            callCustomOK(objectController, c.delete)
             resolve(objectController)
           } else {
             ajaxJSON(objectController.url, "delete", undefined, objectController)
             .then(
               function(data, textStatus, jqXHR) {
                 showLog("deleted")
-                callCustomOK(objectController, c.delete)
                 resolve(objectController)
               },
               function(jqXHR, textStatus, errorThrown) {
-                callCustomOK(objectController, c.delete)
                 reject(objectController, errorThrown)
               }
             )
@@ -1457,17 +1437,15 @@ var iridium = function(customNamespace, startTag, endTag) {
 
     controller.prototype.configure = function(urlOrObject, options, customMethods) {
       this.url = urlOrObject
-      this.options = options
       if(customMethods) this.extend(customMethods)
-      if (customMethods) this.customMethods = customMethods
-      if (options) this.options = options;
+      if (options) this.options = options
       else this.options = ''
       this.isConfigured = true
       if (this.options.indexOf(c.autorefresh) > -1) {
-        this.read() //call first direct to avoid delay
-        setInterval(() => this.read(), 1000)
+        setInterval(() => this[this.realMethodName(c.read)](), 1000)
+        return this[this.realMethodName(c.read)]()//call first direct to avoid delay
       } else {
-        return this.read()
+        return this[this.realMethodName(c.read)]()
       }
     }
 
@@ -1483,7 +1461,7 @@ var iridium = function(customNamespace, startTag, endTag) {
     controller.prototype._fireChanges=function(){
       const controller=this
       if (controller.options && controller.options.indexOf("autosave") > -1) {
-        controller.update().then((controller) => paintToTemplate(controller.name))
+        this[this.realMethodName(c.update)]().then((controller) => paintToTemplate(controller.name))
       } else {
         paintToTemplate(this.name)
       }
