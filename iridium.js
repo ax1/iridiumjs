@@ -731,11 +731,11 @@ var iridium = function(customNamespace, startTag, endTag) {
       if (provider && !controllers[model]) {
         var cr = controller(model)
         controllers[model] = cr
-        cr.configure(provider, null, options)
+        cr.configure(provider, options)
         return false
       } else {
         if (controllers[model].isConfigured === false) {
-          controllers[model].configure(provider, undefined, options)
+          controllers[model].configure(provider, options)
           return false
         }
         if (controllers[model].isReady === false) return false
@@ -1455,7 +1455,7 @@ var iridium = function(customNamespace, startTag, endTag) {
       return promise
     }
 
-    controller.prototype.configure = function(urlOrObject, customMethods, options) {
+    controller.prototype.configure = function(urlOrObject, options, customMethods) {
       this.url = urlOrObject
       this.options = options
       if(customMethods) this.extend(customMethods)
