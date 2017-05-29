@@ -1213,6 +1213,22 @@ var iridium = function(customNamespace, startTag, endTag) {
       }
     }
 
+    /**
+     * Add custom functions to the controller.
+     * @param  {[type]} customMethods {fn1(){....},fn2(){...}}
+     * @return {controller}
+     */
+    controller.prototype.extend=function(customMethods){
+      for(let key of Object.keys(customMethods)){
+        if(!this[key]){
+          this[key]=customMethods[key]
+        }else{
+          console.error('controller: '+this.name+", you cannot override an existing method, method:"+key)
+        }
+      }
+      return this
+    }
+
     controller.prototype.paint = function() {
       const processedTemplates=initializePendingTemplates() //since paint can be called without loading page (i.e: when some templates are in the index page), first check that default-template and others are inited
       if (!processedTemplates.includes(this.name)) paintToTemplate(this.name) //paint
@@ -1442,6 +1458,7 @@ var iridium = function(customNamespace, startTag, endTag) {
     controller.prototype.configure = function(urlOrObject, customMethods, options) {
       this.url = urlOrObject
       this.options = options
+      if(customMethods) this.extend(customMethods)
       if (customMethods) this.customMethods = customMethods
       if (options) this.options = options;
       else this.options = ''
