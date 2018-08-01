@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title></title>
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+    <script src="../../iridium.js"></script>
+  </head>
+  <body>
+    <!-------------------------------------------------------------------------------------------->
+    <h3>Router when template is in the page (therefore, not requested on demand)</h3>
+    <p>try F5 when url without any hash, all elements should appear</p>
+    <p>try F5 when url with the #/jeep hash. Only 1 element should appear (but not 0 elements)</p>
+    <p>this is useful for tabs, filter buttons</p>
+    <section data-model='cars1' data-provider='["scion","lada","jeep"]' data-options='filter'>
+      <div>{{0}}</div>
+    </section>
+    <a href='#/jeep'>only jeeps</a>
+    <script>
+      ir.router('jeep').configure(()=>ir.controller('cars1').paint())
+      ir.controller('cars1').filter=function(arr){
+        if (!location.hash) return arr
+        else return arr.filter(el=>'#/'+el===location.hash)
+      }
+    </script>
+    <!-------------------------------------------------------------------------------------------->
+    <h3>Router should repaint when pressing history back button on browser</h3>
+    <script>
+      ir.router('').configure(()=>ir.controller('cars1').paint())
+    </script>
+    <!-------------------------------------------------------------------------------------------->
+  </body>
+</html>
+
