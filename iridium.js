@@ -965,7 +965,11 @@ var iridium = function(customNamespace, startTag, endTag) {
    */
   function processRoute() {
     var hash = location.hash
-    if (hash.length > 1 && hash.indexOf("/") != 1) return //a normal html anchor
+    if (hash.length > 1 && hash.indexOf("/") != 1){
+      //requesting not a router, but a normal html anchor to navigate into the the document (<p id='aa'></p>)
+      if (!document.getElementById(hash)) console.warn('The document has not a '+hash+' tag. If you are routing, the url syntax is #/'+hash.substr(1)+' (note the / after #)')
+      return
+    }
     if (hash === "#" || hash === "#/") hash = ''
       //
       //IF FIRST TIME & HASH, load default router first
