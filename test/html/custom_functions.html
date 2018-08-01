@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="../../iridium.js"></script>
+  </head>
+  <body>
+    <!------------------------------------------------------------------->
+    <h3>Normal read</h3>
+    <section data-model="books1" data-provider='["c++","lua","ocaml"]'>
+      <div>book name: {{0}}</div>
+    </section>
+    <!------------------------------------------------------------------->
+    <h3>Override read() with custom function</h3>
+    <section data-model="books2" data-provider='["c++","lua","ocaml"]'>
+      <div>book name: {{0}}</div>
+    </section>
+    <div id="log2" style='font-size:0.7em'></div>
+    <script>
+      ir.controller('books2').customRead=function(){
+        document.getElementById('log2').innerHTML='<div>1-executed before reading</div>'
+        this.read().then(obj=>document.getElementById('log2').innerHTML+='<div>2-executed after reading</div>')
+      }
+    </script>
+    <!------------------------------------------------------------------->
+    <h3>Override read() with custom function by using extend</h3>
+    <section data-model="books3" data-provider='["c++","lua","ocaml"]'>
+      <div>book name: {{0}}</div>
+    </section>
+    <div id="log3" style='font-size:0.7em'></div>
+    <script>
+      ir.controller('books3').extend({
+        customRead(){
+          document.getElementById('log3').innerHTML='<div>1-executed before reading</div>'
+          this.read().then(obj=>document.getElementById('log3').innerHTML+='<div>2-executed after reading</div>')
+        }
+      })
+    </script>
+    <!------------------------------------------------------------------->
+    <h3>Override read() with custom function by using extend and configure</h3>
+    <section data-model="books4">
+      <div>book name: {{0}}</div>
+    </section>
+    <div id="log4" style='font-size:0.7em'></div>
+    <script>
+      ir.controller('books4').extend({
+        customRead(){
+          document.getElementById('log4').innerHTML='<div>1-executed before reading</div>'
+          this.read().then(obj=>document.getElementById('log4').innerHTML+='<div>2-executed after reading</div>')
+        }
+      }).configure('["c++","lua","ocaml"]')
+    </script>
+    <!------------------------------------------------------------------->
+    
+  </body>
+</html>
+
