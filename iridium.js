@@ -464,17 +464,17 @@ var iridium = function(customNamespace, startTag, endTag) {
     function executeFunctionOrVariable(controllerName, key, attributeName) {
       let index = key.indexOf('(')
       if (!attributeName) attributeName = ''
+      const controller=controllers[controllerName]
       if (index === -1) {
-        return controllers[controllerName].model.get(key)
+        return controller.model.get(key)
       } else {
         let functionName = key.substring(0, index).trim()
         if (attributeName.startsWith('on') || attributeName.startsWith(c.data_ + 'on')) {
-          return "ir.controller('" + controllerName + "')." + ir.controller.realMethodName(key.substring(0,index).trim())
+          return "ir.controller('" + controllerName + "')." + controller.realMethodName(key.substring(0,index).trim())
         } else {
-          return run(ir.controller.realMethodName(functionName), [], ir.controller(controllerName))
+          return run(controller.realMethodName(functionName), [], controller)
         }
       }
-
     }
 
     return sanitize(process(controllerName, key, object))
