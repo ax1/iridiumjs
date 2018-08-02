@@ -668,6 +668,7 @@ var iridium = function(customNamespace, startTag, endTag) {
      * parse {{}} in element contents
      */
     function parseContent(templateName, el, jEl, object) {
+      if (el.tagName==="SCRIPT") return
       var nodes = el.childNodes
       for (var r = 0; r < nodes.length; r++) {
         var node = nodes[r]
