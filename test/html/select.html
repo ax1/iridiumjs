@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title></title>
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery.min.js"></script>
     <script src="../../iridium.js"></script>
   </head>
   <body>
@@ -24,17 +24,19 @@
     </script>
 
     <h3>adding a default value not provided in the model</h3>
-    <select data-model='cars-filters1' data-provider='' onchange='{{cars:paint()}}'>
+    <select data-model='cars-filters1' onchange='{{cars:paint()}}'>
       <option value='{{0.vendor}}'>{{0.vendor}}</option>
     </select>
     <script>
-      ir.controller('cars-filters1').configure([{"vendor":"bmw","model":"M3"},{"vendor":"audi","model":"A5"}],{
-        read:[
-          function(){
-            ir.controller('cars-filters1').model._obj.unshift({"vendor":"none","model":""})
-            ir.controller('cars-filters1').repaint()
-          },null
-        ]
+      ir.controller('cars-filters1').configure([{"vendor":"bmw","model":"M3"},{"vendor":"audi","model":"A5"}], null, {
+        customRead(){
+          this.read().then(
+            function(){
+              ir.controller('cars-filters1').model._obj.unshift({"vendor":"none","model":""})
+              ir.controller('cars-filters1').paint()
+            }
+          )
+        }
       })
     </script>
 

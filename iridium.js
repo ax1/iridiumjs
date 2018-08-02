@@ -470,7 +470,7 @@ var iridium = function(customNamespace, startTag, endTag) {
       } else {
         let functionName = key.substring(0, index).trim()
         if (attributeName.startsWith('on') || attributeName.startsWith(c.data_ + 'on')) {
-          return "ir.controller('" + controllerName + "')." + controller.realMethodName(key.substring(0,index).trim())
+          return "ir.controller('" + controllerName + "')." + controller.realMethodName(key.substring(0,index).trim())+key.substring(index)
         } else {
           return run(controller.realMethodName(functionName), [], controller)
         }
