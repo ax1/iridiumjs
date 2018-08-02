@@ -300,36 +300,73 @@ var iridium = function(customNamespace, startTag, endTag) {
   }
 
   /**
-   * Load an html/js page (generic method)
-   //TODO this is a plain vanilla function to load html. This function is not completed since we need to call execute <script> tags properly. See Jquery html (6012) and append() function
+   * insert HTML as text into a container element. The text can contains <script> and <style> tags.
+   * @param  {string} selector css selector of the container
+   * @param  {string} text     the HTML text to be inserted into container
+   * @return {text}   the selector of the container
    */
-  // async function _load2(url,selector){
-  //   try{
-  //     pagesStillLoading[url] = true
-  //     console.log('loading ' + url)
-  //     if (url === '') {
-  //       //default container so the content is already loaded, just execute the methods to render templates
-  //       checkAndExecuteFunctionAfterViewsLoaded(url, selector)
-  //     } else {
-  //       //any other selector, download page and then execute methods
-  //       selector = calculateContainerSelector(url, selector)
-  //       const response=await fetch(url)
-  //       const content=await response.text()
-  //       _unload(selector)
-  //       document.querySelector(selector).innerHTML=content
-  //       checkAndExecuteFunctionAfterViewsLoaded(url, selector)
-  //     }
-  //     return selector
-  //   }catch(e){
-  //     console.error(e)
-  //     throw e
-  //   }
-  // }
+  function insertHTML(selector,text){
+    const container=window.document.querySelector(selector)
+    //1-create DOM elements and insert into container
+    const document=container.ownerDocument
+    const fragment=document.createDocumentFragment()
+    const child=fragment.appendChild(document.createElement("div"))
+    let closeHTMLTags=text.replace(/<(?!area|br|col|embed|hr|img|input|link|meta|param)(([a-z][^\/\0>\x20\t\r\n\f]*)[^>]*)\/>/gi, "<$1></$2>") //borrowed from jquery http://jquery.com/, if <script src=""/> there are problems later when parsing scripts, so close all normal tags
+    child.innerHTML=closeHTMLTags
+    const scripts=fragment.querySelectorAll('script')
+    //TODO chech other browsers if twice executed. If so, disable here scripts (by setting type="whatever") and change the type later when reprocessed
+    container.appendChild(fragment)
+    //2-evaluate scripts if required
+    scripts.forEach(el=>{
+      const newEl=document.createElement("script")//cloneNode does not work (element is created but no listeners are fired for script)
+      if (el.src){
+        const attrs=el.attributes
+        for(let attr of attrs) newEl.setAttribute(attr.name,attr.value)
+        el.parentNode.insertBefore(newEl,el) //this 'insert' will fire script events (download file and execute global variables)
+      }else{
+        newEl.text=el.textContent
+        el.parentNode.insertBefore(newEl,el)
+      }
+      el.remove()//remove the martyr script tag
+    })
+    return selector
+  }
 
   /**
    * Load an html/js page (generic method)
    */
   function _load(url, selector) {
+    pagesStillLoading[url] = true
+    console.log('loading ' + url)
+    if (url === '') {
+      //default container so the content is already loaded, just execute the methods to render templates
+      return new Promise(function(resolve,reject){
+        try{
+          checkAndExecuteFunctionAfterViewsLoaded(url, selector)
+          resolve(selector)
+        }catch(err){
+          reject(err)
+        }
+      })
+    } else {
+      //any other selector, download page and then execute methods
+      selector = calculateContainerSelector(url, selector)
+      _unload(selector) //remove existing data & events
+      //load content and process scripts if found
+      return fetch(url).then(res=>res.text())
+      .then(text=>insertHTML(selector,text))
+      .then(selector=>{checkAndExecuteFunctionAfterViewsLoaded(url, selector);return selector})
+      .catch(err=>{console.error(err);return err})
+    }
+  }
+
+  /**
+   * Load an html/js page (generic method)
+   * Note: this method requires JQuery
+   * @deprecated deprecated by vanilla _load()
+   * //TODO keep this function here until new load() function is battle tested
+   */
+  function _loadJQUERY(url, selector) {
     return new Promise(function (resolve,reject){
       try {
         pagesStillLoading[url] = true
@@ -348,7 +385,6 @@ var iridium = function(customNamespace, startTag, endTag) {
         reject(e)
       }
     })
-
   }
 
   function _unload(selector) {
