@@ -1,10 +1,14 @@
-if (console) console.info("iridium.js 0.7.0")
+if (console) console.info("iridium.js 0.8.0")
 
 //TODO add prototype to router and view objects (as controller does)
 //TODO ir.load should be an async/await function (and the rest of callbacks) TO BE DONE
 if (!window.$) alert('jQuery is required!!!')
-var iridium = function(namespace="iridium", tag1="{{", tag2="}}") {
 
+var iridium = function(libraryName, t1, t2) {
+  "use strict"
+  const namespace = libraryName || iridium
+  const tag1 = t1 || '{{'
+  const tag2 = t2 || '}}'
   const c = {
     session: "session",
     layerLog: "layer-log",
@@ -785,7 +789,6 @@ var iridium = function(namespace="iridium", tag1="{{", tag2="}}") {
      * @param {string} templateName the name of the template that is currently processed
      */
     function paintToTemplate(templateName) {
-      //alert(templateName)
       var selector = cssAttribute(c.data_model, templateName)
       var jTemplate = $(selector)
       if (jTemplate.length <= 0) {
