@@ -3,12 +3,7 @@ if (console) console.info("iridium.js 0.7.0")
 //TODO add prototype to router and view objects (as controller does)
 //TODO ir.load should be an async/await function (and the rest of callbacks) TO BE DONE
 if (!window.$) alert('jQuery is required!!!')
-var iridium = function(customNamespace, startTag, endTag) {
-
-  var namespace = "iridium"
-
-  var tag1 = startTag || "{{"
-  var tag2 = endTag || "}}"
+var iridium = function(namespace="iridium", tag1="{{", tag2="}}") {
 
   const c = {
     session: "session",
@@ -1696,9 +1691,9 @@ var ir = $ir //built-in shortcut
 
 
 //IMPORTANT-Start after document is loaded
-var iridiumNamespace = iridiumNamespace || "iridium"
-var iridiumStartTag = iridiumStartTag || "{{"
-var iridiumEndTag = iridiumEndTag || "}}"
+var iridiumNamespace
+var iridiumStartTag
+var iridiumEndTag
 $(document).ready(function() {
   iridium.start(iridiumNamespace, iridiumStartTag, iridiumEndTag)
 })
