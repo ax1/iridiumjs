@@ -313,7 +313,7 @@ var iridium = function(libraryName, t1, t2) {
     let closeHTMLTags = text.replace(/<(?!area|br|col|embed|hr|img|input|link|meta|param)(([a-z][^\/\0>\x20\t\r\n\f]*)[^>]*)\/>/gi, "<$1></$2>") //borrowed from jquery http://jquery.com/, if <script src=""/> there are problems later when parsing scripts, so close all normal tags
     child.innerHTML = closeHTMLTags
     const scripts = fragment.querySelectorAll('script')
-    //TODO chech other browsers if twice executed. If so, disable here scripts (by setting type="whatever") and change the type later when reprocessed
+    //TODO check other browsers if twice executed. If so, disable here scripts (by setting type="whatever") and change the type later when reprocessed
     container.appendChild(fragment)
     //2-evaluate scripts if required
     scripts.forEach(el => {
@@ -474,6 +474,8 @@ var iridium = function(libraryName, t1, t2) {
     function process(controllerName, key) {
       //querystring is special, it can contain no keys
       if (key === "$queryString" || key === "$querystring") return queryString()
+      // TODO Typescript uses ':' for variable type. '=> & ->' are JS restricted, '#' is ugly and '>' is html like, $ is reserved for external vbles.
+      // Allow either : or :: (C#, Java, ...) for scope. Update documentation as well.
       var index = key.indexOf(":")
       if (index < 0) {
         //--------CURRENT MODEL----------------
