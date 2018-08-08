@@ -1203,7 +1203,7 @@ var iridium = function(libraryName, t1, t2) {
         const currentVal = getObjectProperty(key, this.obj)
         if (currentVal !== value) {
           setObjectProperty(key, value, this.obj)
-          controller._fireChanges()
+          return controller._fireChanges(key)
         }
       },
       add: function(key, value) {
@@ -1213,7 +1213,7 @@ var iridium = function(libraryName, t1, t2) {
         } else {
           obj[key] = value
         }
-        controller._fireChanges()
+        return controller._fireChanges(key)
       },
       delete: function(key) {
         var obj = getObjectPropertyParent(key, this.obj)
@@ -1222,7 +1222,7 @@ var iridium = function(libraryName, t1, t2) {
         } else {
           delete obj[key]
         }
-        controller._fireChanges()
+        return controller._fireChanges(key)
       },
       get length() {
         if (this.obj === undefined || this.obj === null) return -1
@@ -1511,7 +1511,7 @@ var iridium = function(libraryName, t1, t2) {
     /**
      * When model data changes, call controller to update views
      */
-    controller.prototype._fireChanges = function() {
+    controller.prototype._fireChanges = async function(key) {
       const controller = this
       if (controller.options && controller.options.indexOf("autosave") > -1) {
         this[this.realMethodName(c.update)]().then((controller) => paintToTemplate(controller.name))
@@ -1520,6 +1520,7 @@ var iridium = function(libraryName, t1, t2) {
       }
       //notify also the external objects looking for values in this model
       for (let subscriptor of subscriptions.get(this.name)) subscriptions.updateSubscriptor(subscriptor)
+      return [controller, key]
     }
 
     //---------------------------------------
