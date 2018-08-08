@@ -1109,7 +1109,7 @@ var iridium = function(libraryName, t1, t2) {
       var el = subscriptor.element
       if (!el) return
       var attrName = subscriptor.attribute
-      if (attrName !== c.data_value && attrName.startsWith(c.data_)) return
+      // if (attrName !== c.data_value && attrName.startsWith(c.data_)) return
       let attrValue = subscriptor.element.getAttribute(attrName)
       if (!attrValue) return
       if (attrValue.indexOf(tag1) === -1) return
@@ -1144,10 +1144,9 @@ var iridium = function(libraryName, t1, t2) {
       while ((myArray = regex.exec(text)) !== null) {
         let result = myArray[0]
         let index = myArray.index
-        let offset = 0
-        if (index >= 20) offset = index - 20
+        let offset = text.lastIndexOf(c.data_, index)
         let part = text.substring(offset, index)
-        let regex2 = /[ ]data-[a-z]*=/ig
+        let regex2 = /data-[a-z]*=/ig
         let res = regex2.exec(part)
         if (!res) {
           //check if text content and warn to use data-value (since the element cannot be calculated)
@@ -1156,9 +1155,8 @@ var iridium = function(libraryName, t1, t2) {
         //get attribute name
         if (res) {
           let attribute = res[0].replace('=', '').trim()
-          let elements = elContainer.querySelectorAll(cssAttribute(attribute, result))
-          let topic = result.replace('{{', '').trim()
-          topic = topic.substring(0, topic.indexOf(':')).trim()
+          let elements = elContainer.querySelectorAll(cssAttribute(attribute + '*', result))
+          const topic = result.substring(tag1.length, result.indexOf(':')).trim()
           //get dom element and add to subscriptions
           for (let r = 0; r < elements.length; r++) {
             let el = elements[r]
