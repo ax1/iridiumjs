@@ -1580,7 +1580,8 @@ var iridium = function(libraryName, t1, t2) {
   }
 
   function getRealStorage(url) {
-    if (url.startsWith("localStorage/")) return localStorage
+    if (typeof(url) !== 'string') return null
+    else if (url.startsWith("localStorage/")) return localStorage
     else if (url.startsWith("sessionStorage/")) return sessionStorage
     else return null
   }
