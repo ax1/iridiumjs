@@ -851,6 +851,7 @@ var iridium = function(libraryName, t1, t2) {
       parseAttributes(templateName, el, jEl, object)
       //(el.attributes[c.data_skeleton]) return//if skeleton, do nothing
       if (object instanceof Array && el.hasAttribute(c.data_model)) {
+        let selectorFocus = getSelectorFocus(el)
         let array = object
         let pos = processDataOptions(el, templateName, object)
         //if template not processed, copy all child nodes into a hidden container
@@ -892,11 +893,37 @@ var iridium = function(libraryName, t1, t2) {
 
         //continue with child elements
         parseChildren(templateName, el, jEl, array)
+
+        // set focus again
+        if (selectorFocus) el.querySelector(selectorFocus).focus()
+
       } else {
         //parseAttributes(templateName, el, jEl, object)
         parseContent(templateName, el, jEl, object)
         parseChildren(templateName, el, jEl, object)
       }
+    }
+
+
+    function getSelectorFocus(elTemplate) {
+      let el = document.activeElement
+      if (elTemplate.contains(el)) {
+        var names = [];
+        while (el.parentNode && el.parentNode !== elTemplate) {
+          if (el.id) {
+            names.unshift('#' + el.id);
+            break;
+          } else {
+            if (el == el.ownerDocument.documentElement) names.unshift(el.tagName);
+            else {
+              for (var c = 1, e = el; e.previousElementSibling; e = e.previousElementSibling, c++);
+              names.unshift(el.tagName + ":nth-child(" + c + ")");
+            }
+            el = el.parentNode;
+          }
+        }
+        return names.join(" > ");
+      } else return null
     }
 
     // data-options attribute can contain custom functions for filtering or sorting data
