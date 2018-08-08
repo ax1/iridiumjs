@@ -405,7 +405,8 @@ var iridium = function(libraryName, t1, t2) {
         if (controllers[templateName]) controllers[templateName]._destroy()
       }
     }
-    $(selector).empty()
+    const container = document.querySelector(selector)
+    while (container.firstChild) container.removeChild(container.firstChild) // performs better than innerHTML https://jsperf.com/innerhtml-vs-removechild/37
   }
 
   /**
