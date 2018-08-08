@@ -1526,7 +1526,7 @@ var iridium = function(libraryName, t1, t2) {
       const controller = this
       return new Promise(function(resolve, reject) {
         try {
-          if (!getRealStorage(controller.url) && controller.options && controller.options.indexOf("autosave") > -1) {
+          if (controller.options && controller.options.indexOf("autosave") > -1) {
             controller[controller.realMethodName(c.update)]().then((controller) => paintToTemplate(controller.name)).catch(err => reject(err))
           } else {
             paintToTemplate(controller.name)
