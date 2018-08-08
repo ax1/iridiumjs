@@ -33,7 +33,7 @@ var iridium = function(libraryName, t1, t2) {
     autosave: "autosave"
   }
 
-  const htmlBooleanAttributes=['allowFullscreen','async','autofocus','autoplay','checked','compact','controls','declare','default','defaultChecked','defaultMuted','defaultSelected','defer','disabled','draggable','enabled','formNoValidate','hidden','indeterminate','inert','isMap','itemScope','loop','multiple','muted','noHref','noResize','noShade','noValidate','noWrap','open','pauseOnExit','readOnly','required','reversed','scoped','seamless','selected','sortable','spellcheck','translate','trueSpeed','typeMustMatch','visible']
+  const htmlBooleanAttributes = ['allowFullscreen', 'async', 'autofocus', 'autoplay', 'checked', 'compact', 'controls', 'declare', 'default', 'defaultChecked', 'defaultMuted', 'defaultSelected', 'defer', 'disabled', 'draggable', 'enabled', 'formNoValidate', 'hidden', 'indeterminate', 'inert', 'isMap', 'itemScope', 'loop', 'multiple', 'muted', 'noHref', 'noResize', 'noShade', 'noValidate', 'noWrap', 'open', 'pauseOnExit', 'readOnly', 'required', 'reversed', 'scoped', 'seamless', 'selected', 'sortable', 'spellcheck', 'translate', 'trueSpeed', 'typeMustMatch', 'visible']
 
   function cssAttribute(attr, value) {
     if (!value && value !== '') {
@@ -51,7 +51,7 @@ var iridium = function(libraryName, t1, t2) {
    * @param scope [OPTIONAL] The object to search for the function definition.if scope is not set, the global scope is used (window)
    * @return the value returned from the function call
    */
-  function run(functionName, params=[], scope) {
+  function run(functionName, params = [], scope) {
     if (!scope) scope = window
     var fn = scope[functionName]
     if (typeof fn === "function") return fn.apply(scope, params)
@@ -165,8 +165,8 @@ var iridium = function(libraryName, t1, t2) {
     headers[c.authorization] = keyValue ? keyValue[2] : null
   }
 
-  function logKeyUndefined(key,value){
-    if (value===undefined) console.warn('The property "'+key+'"'+' was not found (or it is undefined)')
+  function logKeyUndefined(key, value) {
+    if (value === undefined) console.warn('The property "' + key + '"' + ' was not found (or it is undefined)')
   }
 
   /**
@@ -177,13 +177,13 @@ var iridium = function(libraryName, t1, t2) {
   function getObjectPropertyParent(key, object) {
     if (typeof(key) === 'number') key = key.toString()
     var obj = object
-    logKeyUndefined(key,obj)
+    logKeyUndefined(key, obj)
     try {
       var data = key.split('.')
       if (data.length === 1) return object
       while (data.length > 1) {
         obj = obj[data.shift()]
-        logKeyUndefined(data,obj)
+        logKeyUndefined(data, obj)
       }
       return obj
     } catch (error) {
@@ -200,7 +200,7 @@ var iridium = function(libraryName, t1, t2) {
   function getObjectProperty(key, object) {
     if (typeof(key) === 'number') key = key.toString()
     var obj = getObjectPropertyParent(key, object)
-    logKeyUndefined(key,obj)
+    logKeyUndefined(key, obj)
     if (typeof(obj) === 'undefined') return undefined
     else {
       return obj[key.split('.').pop()]
@@ -214,7 +214,7 @@ var iridium = function(libraryName, t1, t2) {
    */
   function setObjectProperty(key, value, object) {
     var obj = getObjectPropertyParent(key, object)
-    logKeyUndefined(key,value) //the programmer can set value undefined, but most of the cases this is a typing error (i.e: key=fooo instead of foo)
+    logKeyUndefined(key, value) //the programmer can set value undefined, but most of the cases this is a typing error (i.e: key=fooo instead of foo)
     obj[key.split('.').pop()] = value
   }
 
@@ -232,15 +232,15 @@ var iridium = function(libraryName, t1, t2) {
   }
 
   function createLayerLog() {
-    if (!document.getElementById("#" + c.layerLog)){
+    if (!document.getElementById("#" + c.layerLog)) {
       const style = "<style>#" + c.layerLog + "{display:none;position: fixed; width:30%; margin: 0 0 0 -15%;left:50%;background-color:rgba(255,0,0,0.8);text-align:center;z-index:100000;top:0%;font-weight:bold;padding:0.1em;border-radius:3px}</style>"
       const element = '<div id="' + c.layerLog + '" ></div>'
-      document.body.insertAdjacentHTML('afterBegin', style+'\n'+element)
+      document.body.insertAdjacentHTML('afterBegin', style + '\n' + element)
     }
   }
 
-  function toCapitalCase(text){
-    return text.charAt(0).toUpperCase()+text.slice(1)
+  function toCapitalCase(text) {
+    return text.charAt(0).toUpperCase() + text.slice(1)
   }
 
   var pagesStillLoading = {}
@@ -255,7 +255,7 @@ var iridium = function(libraryName, t1, t2) {
     if (!selector) selector = "body"
     initializePendingTemplates()
     //after page loaded execute custom function
-    if (pagesStillLoading.length===0) {
+    if (pagesStillLoading.length === 0) {
       if (funcToCallAfterViewLoaded) {
         if (typeof funcToCallAfterViewLoaded === 'function') {
           funcToCallAfterViewLoaded()
@@ -268,11 +268,11 @@ var iridium = function(libraryName, t1, t2) {
     }
   }
 
-  function initializePendingTemplates(){
-    const processedTemplates=[]
-    const templates=document.querySelectorAll("[" + c.data_model + "]:not([" + c.data_status + "])")
+  function initializePendingTemplates() {
+    const processedTemplates = []
+    const templates = document.querySelectorAll("[" + c.data_model + "]:not([" + c.data_status + "])")
     for (let r = 0; r < templates.length; r++) {
-      if(!templates[r].getAttribute(c.data_status)) {
+      if (!templates[r].getAttribute(c.data_status)) {
         paintToTemplate(templates[r].getAttribute(c.data_model)) //check status again because a non-inited template can be initialized if it is a child template
         processedTemplates.push(templates[r])
       }
@@ -304,29 +304,29 @@ var iridium = function(libraryName, t1, t2) {
    * @param  {string} text     the HTML text to be inserted into container
    * @return {text}   the selector of the container
    */
-  function insertHTML(selector,text){
-    const container=window.document.querySelector(selector)
+  function insertHTML(selector, text) {
+    const container = window.document.querySelector(selector)
     //1-create DOM elements and insert into container
-    const document=container.ownerDocument
-    const fragment=document.createDocumentFragment()
-    const child=fragment.appendChild(document.createElement("div"))
-    let closeHTMLTags=text.replace(/<(?!area|br|col|embed|hr|img|input|link|meta|param)(([a-z][^\/\0>\x20\t\r\n\f]*)[^>]*)\/>/gi, "<$1></$2>") //borrowed from jquery http://jquery.com/, if <script src=""/> there are problems later when parsing scripts, so close all normal tags
-    child.innerHTML=closeHTMLTags
-    const scripts=fragment.querySelectorAll('script')
+    const document = container.ownerDocument
+    const fragment = document.createDocumentFragment()
+    const child = fragment.appendChild(document.createElement("div"))
+    let closeHTMLTags = text.replace(/<(?!area|br|col|embed|hr|img|input|link|meta|param)(([a-z][^\/\0>\x20\t\r\n\f]*)[^>]*)\/>/gi, "<$1></$2>") //borrowed from jquery http://jquery.com/, if <script src=""/> there are problems later when parsing scripts, so close all normal tags
+    child.innerHTML = closeHTMLTags
+    const scripts = fragment.querySelectorAll('script')
     //TODO chech other browsers if twice executed. If so, disable here scripts (by setting type="whatever") and change the type later when reprocessed
     container.appendChild(fragment)
     //2-evaluate scripts if required
-    scripts.forEach(el=>{
-      const newEl=document.createElement("script")//cloneNode does not work (element is created but no listeners are fired for script)
-      if (el.src){
-        const attrs=el.attributes
-        for(let attr of attrs) newEl.setAttribute(attr.name,attr.value)
-        el.parentNode.insertBefore(newEl,el) //this 'insert' will fire script events (download file and execute global variables)
-      }else{
-        newEl.text=el.textContent
-        el.parentNode.insertBefore(newEl,el)
+    scripts.forEach(el => {
+      const newEl = document.createElement("script") //cloneNode does not work (element is created but no listeners are fired for script)
+      if (el.src) {
+        const attrs = el.attributes
+        for (let attr of attrs) newEl.setAttribute(attr.name, attr.value)
+        el.parentNode.insertBefore(newEl, el) //this 'insert' will fire script events (download file and execute global variables)
+      } else {
+        newEl.text = el.textContent
+        el.parentNode.insertBefore(newEl, el)
       }
-      el.remove()//remove the martyr script tag
+      el.remove() //remove the martyr script tag
     })
     return selector
   }
@@ -339,11 +339,11 @@ var iridium = function(libraryName, t1, t2) {
     console.log('loading ' + url)
     if (url === '') {
       //default container so the content is already loaded, just execute the methods to render templates
-      return new Promise(function(resolve,reject){
-        try{
+      return new Promise(function(resolve, reject) {
+        try {
           checkAndExecuteFunctionAfterViewsLoaded(url, selector)
           resolve(selector)
-        }catch(err){
+        } catch (err) {
           reject(err)
         }
       })
@@ -352,10 +352,16 @@ var iridium = function(libraryName, t1, t2) {
       selector = calculateContainerSelector(url, selector)
       _unload(selector) //remove existing data & events
       //load content and process scripts if found
-      return fetch(url).then(res=>res.text())
-      .then(text=>insertHTML(selector,text))
-      .then(selector=>{checkAndExecuteFunctionAfterViewsLoaded(url, selector);return selector})
-      .catch(err=>{console.error(err);return err})
+      return fetch(url).then(res => res.text())
+        .then(text => insertHTML(selector, text))
+        .then(selector => {
+          checkAndExecuteFunctionAfterViewsLoaded(url, selector);
+          return selector
+        })
+        .catch(err => {
+          console.error(err);
+          return err
+        })
     }
   }
 
@@ -366,7 +372,7 @@ var iridium = function(libraryName, t1, t2) {
    * //TODO keep this function here until new load() function is battle tested
    */
   function _loadJQUERY(url, selector) {
-    return new Promise(function (resolve,reject){
+    return new Promise(function(resolve, reject) {
       try {
         pagesStillLoading[url] = true
         console.log('loading ' + url)
@@ -377,7 +383,10 @@ var iridium = function(libraryName, t1, t2) {
           //any other selector, download page and then execute methods
           selector = calculateContainerSelector(url, selector)
           _unload(selector) //remove existing data & events
-          $(selector).load(url, function() {checkAndExecuteFunctionAfterViewsLoaded(url, selector);resolve(selector)})
+          $(selector).load(url, function() {
+            checkAndExecuteFunctionAfterViewsLoaded(url, selector);
+            resolve(selector)
+          })
         }
       } catch (e) {
         console.error(e)
@@ -499,13 +508,13 @@ var iridium = function(libraryName, t1, t2) {
     function executeFunctionOrVariable(controllerName, key, attributeName) {
       let index = key.indexOf('(')
       if (!attributeName) attributeName = ''
-      const controller=controllers[controllerName]
+      const controller = controllers[controllerName]
       if (index === -1) {
         return controller.model.get(key)
       } else {
         let functionName = key.substring(0, index).trim()
         if (attributeName.startsWith('on') || attributeName.startsWith(c.data_ + 'on')) {
-          return "ir.controller('" + controllerName + "')." + controller.realMethodName(key.substring(0,index).trim())+key.substring(index)
+          return "ir.controller('" + controllerName + "')." + controller.realMethodName(key.substring(0, index).trim()) + key.substring(index)
         } else {
           return run(controller.realMethodName(functionName), [], controller)
         }
@@ -530,12 +539,12 @@ var iridium = function(libraryName, t1, t2) {
         items = expression.split('|').map(el => el.trim())
       }
       let value = processExpression(controllerName, items[0], object, attributeName)
-      for (let r=1;r<items.length;r++) {
-        let fn=items[r]
-        if (fn.indexOf('(')>-1) console.error(' incorrect format of pipe, the function name should not have parenthesis')
+      for (let r = 1; r < items.length; r++) {
+        let fn = items[r]
+        if (fn.indexOf('(') > -1) console.error(' incorrect format of pipe, the function name should not have parenthesis')
         //fn=fn+'('+value+')'
-        value=run(fn, [value], ir.controller(controllerName))
-    }
+        value = run(fn, [value], ir.controller(controllerName))
+      }
       let newText
       if (typeof value === 'object') {
         newText = JSON.stringify(value)
@@ -604,17 +613,17 @@ var iridium = function(libraryName, t1, t2) {
         }
         //add to real html attribute the processed value
         var realAttrName = attr.name.substring(c.data_.length)
-          //----------------------------------------------------------
-          //      if real attribute->set real values
-          //----------------------------------------------------------
+        //----------------------------------------------------------
+        //      if real attribute->set real values
+        //----------------------------------------------------------
         if (jEl.attr(realAttrName) && jEl.attr(realAttrName) !== expression) {
           jEl.attr(realAttrName, expression)
         }
         //----------------------------------------------------------
         //      if special attributes (checked, autofocus,...) add or remove property (these properties have no value, and are taken into account if present)
         //----------------------------------------------------------
-        if (htmlBooleanAttributes.includes(realAttrName)){
-          if (res.value===true) el.setAttribute(realAttrName,realAttrName)
+        if (htmlBooleanAttributes.includes(realAttrName)) {
+          if (res.value === true) el.setAttribute(realAttrName, realAttrName)
           else el.removeAttribute(realAttrName)
         }
         //----------------------------------------------------------
@@ -667,22 +676,22 @@ var iridium = function(libraryName, t1, t2) {
      * parse {{}} in element contents
      */
     function parseContent(templateName, el, jEl, object) {
-      if (el.tagName==="SCRIPT") return
+      if (el.tagName === "SCRIPT") return
       var nodes = el.childNodes
       for (var r = 0; r < nodes.length; r++) {
         var node = nodes[r]
         if (node.nodeType == 3) { //IF TEXT
           if (node.data.indexOf(tag1) === -1) continue
           var res = lookupExpression(templateName, node.data, object, null)
-            //if {{}} create the <span> nodes
+          //if {{}} create the <span> nodes
           if (res) {
             var node1 = document.createTextNode(res.oldText.substring(0, res.index1))
-            var node2 = document.createElement("span");
-            node2.setAttribute(c.data_value, tag1 + res.expression + tag2);
+            var node2 = document.createElement("span")
+            node2.setAttribute(c.data_value, tag1 + res.expression + tag2)
             node2.textContent = res.value
             var node3 = document.createTextNode(res.oldText.substring(res.index2))
-            node.parentNode.insertBefore(node1, node);
-            node.parentNode.insertBefore(node2, node);
+            node.parentNode.insertBefore(node1, node)
+            node.parentNode.insertBefore(node2, node)
             node.parentNode.insertBefore(node3, node)
             node.parentNode.removeChild(node)
             r = 0 //reset loop
@@ -718,7 +727,7 @@ var iridium = function(libraryName, t1, t2) {
       var model = templateName
       var provider = elTemplate.getAttribute(c.data_provider)
       if (model.indexOf(tag1) === -1 && (!provider || provider.indexOf(tag1) === -1)) return model //static template, exit
-        //object. the dynamic template should take a value from his parent template "{{a}}", or explicit template "{{myTemplate:a}"
+      //object. the dynamic template should take a value from his parent template "{{a}}", or explicit template "{{myTemplate:a}"
       var object
       var jParent = $(elTemplate).parents(cssAttribute(c.data_model))
       if (jParent.length > 0) {
@@ -740,7 +749,7 @@ var iridium = function(libraryName, t1, t2) {
         provider = res2.newText
         elTemplate.setAttribute(c.data_provider, provider)
         if (controllers[model]) throw (namespace + ": controller name: " + model + " and provider:" + provider + " is an existing controller. Either remove it or just overwrite it")
-          //controllers[model]=controller(model)
+        //controllers[model]=controller(model)
       }
       //if changed, load provider async(ajax), and don't paint until the data is downloaded
       // if(res1 || res2){
@@ -797,7 +806,7 @@ var iridium = function(libraryName, t1, t2) {
       }
       var elTemplate = jTemplate[0]
       if (!elTemplate) return
-        //if the parent template is not inited yet, wait for initialization before painting this templates
+      //if the parent template is not inited yet, wait for initialization before painting this templates
       var jParent = jTemplate.parents(cssAttribute(c.data_model))
       if (jParent.length > 0) {
         var parentTemplateName = jParent.attr(c.data_model)
@@ -816,9 +825,9 @@ var iridium = function(libraryName, t1, t2) {
       }
       var object = controllers[templateName].model.obj
       console.debug("painting template '" + templateName + "'")
-        //paint nodes
+      //paint nodes
       paintNodes(templateName, elTemplate, jTemplate, object)
-        //if template was not inited yet->all processed->mark as inited
+      //if template was not inited yet->all processed->mark as inited
       if (!jTemplate.attr(c.data_status)) {
         subscriptions.setExternalSubscriptions(elTemplate, templateName)
         jTemplate.attr(c.data_status, "inited")
@@ -840,38 +849,42 @@ var iridium = function(libraryName, t1, t2) {
       //(el.attributes[c.data_skeleton]) return//if skeleton, do nothing
       if (object instanceof Array && el.hasAttribute(c.data_model)) {
         let array = object
-        let pos = processDataOptions(el,templateName,object)
+        let pos = processDataOptions(el, templateName, object)
         //if template not processed, copy all child nodes into a hidden container
         let elSkeleton = el.querySelector(cssAttribute(c.data_skeleton))
         if (!elSkeleton) {
-          if (el.tagName.toLowerCase()==='select'){//select cannot have child tags other than <option>, so skeleton must be added as property
-            if (!el.hasAttribute(c.data_skeleton)) el.setAttribute(c.data_skeleton,el.innerHTML)
-          }else{
+          if (el.tagName.toLowerCase() === 'select') { //select cannot have child tags other than <option>, so skeleton must be added as property
+            if (!el.hasAttribute(c.data_skeleton)) el.setAttribute(c.data_skeleton, el.innerHTML)
+          } else {
             elSkeleton = document.createElement("div")
             elSkeleton.style.display = "none"
             elSkeleton.setAttribute(c.data_skeleton, "")
-            while (el.children.length > 0) {elSkeleton.appendChild(el.children[0])}
+            while (el.children.length > 0) {
+              elSkeleton.appendChild(el.children[0])
+            }
             el.appendChild(elSkeleton)
           }
         }
         //create the list elements
         let skeleton
-        if (el.hasAttribute(c.data_skeleton)){
+        if (el.hasAttribute(c.data_skeleton)) {
           skeleton = el.getAttribute(c.data_skeleton)
-        }else{
-          skeleton=elSkeleton.innerHTML
+        } else {
+          skeleton = elSkeleton.innerHTML
         }
         let text = ""
-        pos.forEach(r=>{
+        pos.forEach(r => {
           let newText = skeleton.replace(/\{\{\s*\d\s*/g, "{{" + r)
           newText = newText.replace(/\{\{0\./g, "{{" + r + ".")
           text = text + newText
         })
         el.innerHTML = text
-        if (!el.hasAttribute(c.data_skeleton)){ //if tag!=<select> the skeleton is created
+        if (!el.hasAttribute(c.data_skeleton)) { //if tag!=<select> the skeleton is created
           let childModels = elSkeleton.querySelectorAll(cssAttribute(c.data_model)) //if skeleton then bypass these data-models
-          for (let s = 0; s < childModels.length; s++) {childModels[s].setAttribute(c.data_status, "inited")}
-          el.innerHTML = el.innerHTML+ elSkeleton.outerHTML
+          for (let s = 0; s < childModels.length; s++) {
+            childModels[s].setAttribute(c.data_status, "inited")
+          }
+          el.innerHTML = el.innerHTML + elSkeleton.outerHTML
         }
 
         //continue with child elements
@@ -885,19 +898,19 @@ var iridium = function(libraryName, t1, t2) {
 
     // data-options attribute can contain custom functions for filtering or sorting data
     // return: array of positions
-    function processDataOptions(el,controllerName,object){
-      let arr=[...object]
-      let pos=arr.map((el,i)=>i)
-      if (el.hasAttribute(c.data_options)){
-        const options=el.getAttribute(c.data_options).split('|')
-        for (let option of options){
-          option=option.trim()
-          if (option!==c.autorefresh && option!==c.autosave){
+    function processDataOptions(el, controllerName, object) {
+      let arr = [...object]
+      let pos = arr.map((el, i) => i)
+      if (el.hasAttribute(c.data_options)) {
+        const options = el.getAttribute(c.data_options).split('|')
+        for (let option of options) {
+          option = option.trim()
+          if (option !== c.autorefresh && option !== c.autosave) {
             if (!(object instanceof Array)) {
-              console.error('the object must be an array to execute '+option+'()')
-            }else{
-              arr=run(option, [arr], ir.controller(controllerName))
-              pos=arr.map(el=>object.findIndex(item=>item===el))
+              console.error('the object must be an array to execute ' + option + '()')
+            } else {
+              arr = run(option, [arr], ir.controller(controllerName))
+              pos = arr.map(el => object.findIndex(item => item === el))
             }
           }
         }
@@ -1000,15 +1013,15 @@ var iridium = function(libraryName, t1, t2) {
    */
   function processRoute() {
     var hash = location.hash
-    if (hash.length > 1 && hash.indexOf("/") != 1){
+    if (hash.length > 1 && hash.indexOf("/") != 1) {
       //requesting not a router, but a normal html anchor to navigate into the the document (<p id='aa'></p>)
-      if (!document.getElementById(hash)) console.warn('The document has not a '+hash+' tag. If you are routing, the url syntax is #/'+hash.substr(1)+' (note the / after #)')
+      if (!document.getElementById(hash)) console.warn('The document has not a ' + hash + ' tag. If you are routing, the url syntax is #/' + hash.substr(1) + ' (note the / after #)')
       return
     }
     if (hash === "#" || hash === "#/") hash = ''
-      //
-      //IF FIRST TIME & HASH, load default router first
-      //
+    //
+    //IF FIRST TIME & HASH, load default router first
+    //
     if (firstTime && hash !== '') {
       console.log('processing router FIRST time ' + location.hash + " default router '' will be loaded ")
       funcToCallAfterViewLoaded = processRoute
@@ -1050,7 +1063,7 @@ var iridium = function(libraryName, t1, t2) {
       var target
       if ($el.length == 1) {
         if ($el.attr(c.data_target)) target = $el.attr(c.data_target)
-          //else if($el.attr("target")) target=$el.attr("target")
+        //else if($el.attr("target")) target=$el.attr("target")
       }
       var rt = routers[id]
       if (rt) {
@@ -1077,7 +1090,7 @@ var iridium = function(libraryName, t1, t2) {
     put: function(topic, subscriptor) {
       if (!Array.isArray(this.obj[topic])) this.obj[topic] = []
       let subscriptors = this.obj[topic]
-        //purge obsolete elements
+      //purge obsolete elements
       for (let r = 0; r < subscriptors.length; r++) {
         if (!subscriptors[r] && !subscriptors[r].element) {
           subscriptors.splice(r, 1)
@@ -1122,10 +1135,10 @@ var iridium = function(libraryName, t1, t2) {
       //"data-model={{name:function(aa.bbb)}}--{{localstorage:release()}} will find the first{{}} and 0the second{{}} as well
       //let regex=/{{\w*:\w*\(?\w*\)?}}/ig fails if {{data-model:variable}} (the - is the offending char)
       let regex = /{{[^<]*:[^<]*\(?\w*\)?}}/ig
-        //"div class='' data-value="
+      //"div class='' data-value="
       let text = elContainer.outerHTML
       var myArray
-        //{{model:val}} found
+      //{{model:val}} found
       while ((myArray = regex.exec(text)) !== null) {
         let result = myArray[0]
         let index = myArray.index
@@ -1144,7 +1157,7 @@ var iridium = function(libraryName, t1, t2) {
           let elements = elContainer.querySelectorAll(cssAttribute(attribute, result))
           let topic = result.replace('{{', '').trim()
           topic = topic.substring(0, topic.indexOf(':')).trim()
-            //get dom element and add to subscriptions
+          //get dom element and add to subscriptions
           for (let r = 0; r < elements.length; r++) {
             let el = elements[r]
             subscriptions.put(topic, {
@@ -1186,8 +1199,8 @@ var iridium = function(libraryName, t1, t2) {
       set: function(key, value) {
         //TODO:SECURITY, PREVENT CODE INJECTION
         ///value=encodeURI(value)
-        const currentVal=getObjectProperty(key,this.obj)
-        if (currentVal!==value){
+        const currentVal = getObjectProperty(key, this.obj)
+        if (currentVal !== value) {
           setObjectProperty(key, value, this.obj)
           controller._fireChanges()
         }
@@ -1240,8 +1253,8 @@ var iridium = function(libraryName, t1, t2) {
     }
 
     /**If a customRead, update... is available, use it. If not, use default function**/
-    controller.prototype.realMethodName=function(methodName){
-      if(this['custom'+toCapitalCase(methodName)]) return 'custom'+toCapitalCase(methodName)
+    controller.prototype.realMethodName = function(methodName) {
+      if (this['custom' + toCapitalCase(methodName)]) return 'custom' + toCapitalCase(methodName)
       else return methodName
     }
 
@@ -1250,19 +1263,19 @@ var iridium = function(libraryName, t1, t2) {
      * @param  {[type]} customMethods {fn1(){....},fn2(){...}}
      * @return {controller}
      */
-    controller.prototype.extend=function(customMethods){
-      for(let key of Object.keys(customMethods)){
-        if(!this[key]){
-          this[key]=customMethods[key]
-        }else{
-          console.error('controller: '+this.name+", you cannot override an existing method, method:"+key)
+    controller.prototype.extend = function(customMethods) {
+      for (let key of Object.keys(customMethods)) {
+        if (!this[key]) {
+          this[key] = customMethods[key]
+        } else {
+          console.error('controller: ' + this.name + ", you cannot override an existing method, method:" + key)
         }
       }
       return this
     }
 
     controller.prototype.paint = function() {
-      const processedTemplates=initializePendingTemplates() //since paint can be called without loading page (i.e: when some templates are in the index page), first check that default-template and others are inited
+      const processedTemplates = initializePendingTemplates() //since paint can be called without loading page (i.e: when some templates are in the index page), first check that default-template and others are inited
       if (!processedTemplates.includes(this.name)) paintToTemplate(this.name) //paint
     }
 
@@ -1273,7 +1286,7 @@ var iridium = function(libraryName, t1, t2) {
           //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
           var url = objectController.url
           var storage = getRealStorage(url)
-            //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
+          //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
           if (storage) {
             let key = url.substring(url.indexOf('/') + 1)
             storage.setItem(key, JSON.stringify(objectController.model.obj))
@@ -1326,7 +1339,7 @@ var iridium = function(libraryName, t1, t2) {
             if (storage) {
               let key = url.substring(url.indexOf('/') + 1)
               let objectType
-                //if model is plural, it should be array
+              //if model is plural, it should be array
               if (objectController.name.substring(key.length - 1).toLowerCase() === 's') objectType = "[]";
               else objectType = "{}"
               let value = storage.getItem(key)
@@ -1362,7 +1375,7 @@ var iridium = function(libraryName, t1, t2) {
         function(resolve, reject) {
           var url = objectController.url
           var storage = getRealStorage(url)
-            //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
+          //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
           if (storage) {
             let key = url.substring(url.indexOf('/') + 1)
             storage.setItem(key, JSON.stringify(objectController.model.obj))
@@ -1390,22 +1403,22 @@ var iridium = function(libraryName, t1, t2) {
           //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
           var url = objectController.url
           var storage = getRealStorage(url)
-            //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
+          //TODO:SECURITY, PREVENT CODE INJECTION by escaping {{
           if (storage) {
             let key = url.substring(url.indexOf('/') + 1)
             storage.removeItem(key)
             resolve(objectController)
           } else {
             ajaxJSON(objectController.url, "delete", undefined, objectController)
-            .then(
-              function(data, textStatus, jqXHR) {
-                showLog("deleted")
-                resolve(objectController)
-              },
-              function(jqXHR, textStatus, errorThrown) {
-                reject(objectController, errorThrown)
-              }
-            )
+              .then(
+                function(data, textStatus, jqXHR) {
+                  showLog("deleted")
+                  resolve(objectController)
+                },
+                function(jqXHR, textStatus, errorThrown) {
+                  reject(objectController, errorThrown)
+                }
+              )
           }
         }
       )
@@ -1416,20 +1429,20 @@ var iridium = function(libraryName, t1, t2) {
      * [ONLY FOR ARRAYS] Useful method to add elements to the model. Note that  controller.model.add(k,v) can be used as replacement
      */
     controller.prototype.add = function(key, value) {
-        let controller = this
-        let model = this.model
-        let promise = new Promise(
-          function(resolve, reject) {
-            try {
-              model.add(key, value)
-              resolve(controller)
-            } catch (e) {
-              reject(controller, e)
-            }
+      let controller = this
+      let model = this.model
+      let promise = new Promise(
+        function(resolve, reject) {
+          try {
+            model.add(key, value)
+            resolve(controller)
+          } catch (e) {
+            reject(controller, e)
           }
-        )
-        return promise
-      }
+        }
+      )
+      return promise
+    }
 
     /**
      * [ONLY FOR ARRAYS] NOTE: this method is different than controller.delete()
@@ -1476,13 +1489,13 @@ var iridium = function(libraryName, t1, t2) {
 
     controller.prototype.configure = function(urlOrObject, options, customMethods) {
       this.url = urlOrObject
-      if(customMethods) this.extend(customMethods)
+      if (customMethods) this.extend(customMethods)
       if (options) this.options = options
       else this.options = ''
       this.isConfigured = true
       if (this.options.indexOf(c.autorefresh) > -1) {
         setInterval(() => this[this.realMethodName(c.read)](), 1000)
-        return this[this.realMethodName(c.read)]()//call first direct to avoid delay
+        return this[this.realMethodName(c.read)]() //call first direct to avoid delay
       } else {
         return this[this.realMethodName(c.read)]()
       }
@@ -1497,14 +1510,14 @@ var iridium = function(libraryName, t1, t2) {
     /**
      * When model data changes, call controller to update views
      */
-    controller.prototype._fireChanges=function(){
-      const controller=this
+    controller.prototype._fireChanges = function() {
+      const controller = this
       if (controller.options && controller.options.indexOf("autosave") > -1) {
         this[this.realMethodName(c.update)]().then((controller) => paintToTemplate(controller.name))
       } else {
         paintToTemplate(this.name)
       }
-        //notify also the external objects looking for values in this model
+      //notify also the external objects looking for values in this model
       for (let subscriptor of subscriptions.get(this.name)) subscriptions.updateSubscriptor(subscriptor)
     }
 
@@ -1585,7 +1598,7 @@ var iridium = function(libraryName, t1, t2) {
       temporaryCustomClick.new = true
     })
     $(window).on("hashchange", processRoute)
-      //Ajax can set request headers but not html files, every time a new tab is open  the list of headers are loaded from cookies
+    //Ajax can set request headers but not html files, every time a new tab is open  the list of headers are loaded from cookies
     insertHeaders()
   }
 
@@ -1598,7 +1611,7 @@ var iridium = function(libraryName, t1, t2) {
   */
 
   init()
-    ////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////
 
   /*
   ██ ██████       ██████  ██████       ██ ███████  ██████ ████████
