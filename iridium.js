@@ -1513,7 +1513,7 @@ var iridium = function(libraryName, t1, t2) {
      */
     controller.prototype._fireChanges = async function(key) {
       const controller = this
-      if (controller.options && controller.options.indexOf("autosave") > -1) {
+      if (!getRealStorage(controller.url) && controller.options && controller.options.indexOf("autosave") > -1) {
         this[this.realMethodName(c.update)]().then((controller) => paintToTemplate(controller.name))
       } else {
         paintToTemplate(this.name)
