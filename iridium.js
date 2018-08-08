@@ -1205,6 +1205,7 @@ var iridium = function(libraryName, t1, t2) {
           setObjectProperty(key, value, this.obj)
           return controller._fireChanges(key)
         }
+        return controller._fireNothing(key)
       },
       add: function(key, value) {
         var obj = getObjectPropertyParent(key, this.obj)
@@ -1509,18 +1510,34 @@ var iridium = function(libraryName, t1, t2) {
     }
 
     /**
+     * Return a fake promise-> do nothing but return as fast as possible+
+     * This method is useful to keep code work as async even if there is no operation to perform.
+     * For instance, if model.set() but the newValue===old value the code would return null and .then() method would raise error.
+     * @return {[type]} [description]
+     */
+    controller.prototype._fireNothing = async function(key) {
+      return [this, key]
+    }
+
+    /**
      * When model data changes, call controller to update views
      */
-    controller.prototype._fireChanges = async function(key) {
+    controller.prototype._fireChanges = function(key) {
       const controller = this
-      if (!getRealStorage(controller.url) && controller.options && controller.options.indexOf("autosave") > -1) {
-        this[this.realMethodName(c.update)]().then((controller) => paintToTemplate(controller.name))
-      } else {
-        paintToTemplate(this.name)
-      }
-      //notify also the external objects looking for values in this model
-      for (let subscriptor of subscriptions.get(this.name)) subscriptions.updateSubscriptor(subscriptor)
-      return [controller, key]
+      return new Promise(function(resolve, reject) {
+        try {
+          if (!getRealStorage(controller.url) && controller.options && controller.options.indexOf("autosave") > -1) {
+            controller[controller.realMethodName(c.update)]().then((controller) => paintToTemplate(controller.name)).catch(err => reject(err))
+          } else {
+            paintToTemplate(controller.name)
+          }
+          //notify also the external objects looking for values in this model
+          for (let subscriptor of subscriptions.get(controller.name)) subscriptions.updateSubscriptor(subscriptor)
+          resolve([controller, key])
+        } catch (error) {
+          reject(error)
+        }
+      })
     }
 
     //---------------------------------------
