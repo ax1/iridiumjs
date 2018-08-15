@@ -3,23 +3,22 @@
 
 Javascript library to create web apps.
 
-Easy to learn & use, fully compatible with any server technology, JSON & REST oriented.
+Easy to learn & use, fully compatible with any client or server framework, JSON & REST oriented.
 
 Go to  **[site](https://ax1.github.io/iridiumjs)** for general description & production iridium.js file.
 
 Go to **[wiki](https://github.com/ax1/iridiumjs/wiki)** for detailed info, tutorial, demo & reference.
 
 ### Set up (USER) ###
-Add iridium.js to your application ([jquery](http://jquery.com/download/) is also required)
-
+Add iridium.js to your application.
 
 ```html
-
-<script src="http://code.jquery.com/jquery-2.2.3.min.js"></script>
-<script src="http://ax1.github.io/iridiumjs/versions/iridium-0.5.0.min.js"></script>
+<script src="http://ax1.github.io/iridiumjs/versions/iridium-latest.min.js"></script>
 ```
-### Set up (CONTRIBUTOR) ###
 
-No weird or complex configuration is required, just clone the repo, open your favourite IDE or text editor and let your fingers play the piano!!!
+### Set up (CONTRIBUTOR) ###
+- (zero config, zero build steps, no dependencies) 
+- clone the repo
+- open iridium.js in your favourite IDE or text editor
 
 Enjoy!
