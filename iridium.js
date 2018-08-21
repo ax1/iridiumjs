@@ -1230,9 +1230,9 @@ var iridium = function(libraryName, t1, t2) {
         const currentVal = getObjectProperty(key, this.obj)
         if (currentVal !== value) {
           setObjectProperty(key, value, this.obj)
-          return controller._fireChanges(key)
+          return controller._fireChanges()
         }
-        return controller._fireNothing(key)
+        return controller._fireNothing()
       },
       add: function(key, value) {
         var obj = getObjectPropertyParent(key, this.obj)
@@ -1241,7 +1241,7 @@ var iridium = function(libraryName, t1, t2) {
         } else {
           obj[key] = value
         }
-        return controller._fireChanges(key)
+        return controller._fireChanges()
       },
       delete: function(key) {
         var obj = getObjectPropertyParent(key, this.obj)
@@ -1250,7 +1250,7 @@ var iridium = function(libraryName, t1, t2) {
         } else {
           delete obj[key]
         }
-        return controller._fireChanges(key)
+        return controller._fireChanges()
       },
       get length() {
         if (this.obj === undefined || this.obj === null) return -1
@@ -1540,16 +1540,16 @@ var iridium = function(libraryName, t1, t2) {
      * Return a fake promise-> do nothing but return as fast as possible+
      * This method is useful to keep code work as async even if there is no operation to perform.
      * For instance, if model.set() but the newValue===old value the code would return null and .then() method would raise error.
-     * @return {[type]} [description]
+     * @return {controller}
      */
-    controller.prototype._fireNothing = async function(key) {
-      return [this, key]
+    controller.prototype._fireNothing = async function() {
+      return this
     }
 
     /**
      * When model data changes, call controller to update views
      */
-    controller.prototype._fireChanges = function(key) {
+    controller.prototype._fireChanges = function() {
       const controller = this
       return new Promise(function(resolve, reject) {
         try {
@@ -1560,7 +1560,7 @@ var iridium = function(libraryName, t1, t2) {
           }
           //notify also the external objects looking for values in this model
           for (let subscriptor of subscriptions.get(controller.name)) subscriptions.updateSubscriptor(subscriptor)
-          resolve([controller, key])
+          resolve(controller)
         } catch (error) {
           reject(error)
         }
