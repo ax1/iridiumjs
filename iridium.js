@@ -1276,6 +1276,7 @@ var iridium = function(libraryName, t1, t2) {
       this.url = undefined
       this.model = model(name, this)
       this.template = cssAttribute(c.data_model, this.name)
+      this.view = document.querySelector(this.template)
       this.isConfigured = false //when configure() has been called,it will set isReady when read() is retrieved. A controller can exists but not configure when for instance, new methods are added before configuring
       this.isReady = false //when configure() and read() has been called, therefore we can paint  data to template
       this.options = ""
