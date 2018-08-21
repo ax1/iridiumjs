@@ -878,8 +878,10 @@ var iridium = function(libraryName, t1, t2) {
         }
         let text = ""
         pos.forEach(r => {
-          let newText = skeleton.replace(/\{\{\s*\d\s*/g, "{{" + r)
-          newText = newText.replace(/\{\{0\./g, "{{" + r + ".")
+          const regex1 = new RegExp(tag1 + '\s*\d+\s*', 'g') // regex: /{{\s*\d+\s*/
+          const regex2 = new RegExp(tag1 + '0\.', 'g') // regex: /\{\{0\./
+          let newText = skeleton.replace(regex1, tag1 + r)
+          newText = newText.replace(regex2, tag1 + r + ".")
           text = text + newText
         })
         el.innerHTML = text
