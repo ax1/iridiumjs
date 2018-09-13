@@ -883,11 +883,8 @@ var iridium = function(libraryName, t1, t2) {
         }
         let text = ""
         pos.forEach(r => {
-          const regex1 = new RegExp(tag1 + '\s*\d+\s*', 'g') // regex: /{{\s*\d+\s*/
-          const regex2 = new RegExp(tag1 + '0\.', 'g') // regex: /\{\{0\./
-          let newText = skeleton.replace(regex1, tag1 + r)
-          newText = newText.replace(regex2, tag1 + r + ".")
-          text = text + newText
+          const regex = new RegExp(tag1 + '\\s*\\d+\\s*', 'g') // regex: /{{\s*\d+\s*/g
+          text = text + skeleton.replace(regex, tag1 + r)
         })
         el.innerHTML = text
         if (!el.hasAttribute(c.data_skeleton)) { //if tag!=<select> the skeleton is created
