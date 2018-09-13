@@ -24,6 +24,7 @@ var iridium = function(libraryName, t1, t2) {
     data_event: "data-event",
     data_load: "data-load",
     data_options: "data-options",
+    data_index: "data-index",
     data_: "data-",
     create: "create",
     read: "read",
@@ -858,7 +859,10 @@ var iridium = function(libraryName, t1, t2) {
         let elSkeleton = el.querySelector(cssAttribute(c.data_skeleton))
         if (!elSkeleton) {
           if (el.tagName.toLowerCase() === 'select') { //select cannot have child tags other than <option>, so skeleton must be added as property
-            if (!el.hasAttribute(c.data_skeleton)) el.setAttribute(c.data_skeleton, el.innerHTML)
+            if (!el.hasAttribute(c.data_skeleton)) {
+              el.setAttribute(c.data_skeleton, el.innerHTML)
+              el.setAttribute(c.data_index, tag1 + '0' + tag2)
+            }
           } else {
             elSkeleton = document.createElement("div")
             elSkeleton.style.display = "none"
@@ -866,6 +870,7 @@ var iridium = function(libraryName, t1, t2) {
             while (el.children.length > 0) {
               elSkeleton.appendChild(el.children[0])
             }
+            elSkeleton.firstElementChild.setAttribute(c.data_index, tag1 + '0' + tag2)
             el.appendChild(elSkeleton)
           }
         }
@@ -1257,6 +1262,18 @@ var iridium = function(libraryName, t1, t2) {
       get length() {
         if (this.obj === undefined || this.obj === null) return -1
         else return this.obj.length
+      },
+      indexOf: function(el) {
+        let element = el
+        while (element) {
+          if (element.hasAttribute(c.data_index)) {
+            const regex = /\d+/g
+            const pos = regex.exec(element.getAttribute(c.data_index))
+            return parseInt(pos)
+          }
+          element = element.parentElement
+        }
+        return null
       }
     }
     return model
